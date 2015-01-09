@@ -6,14 +6,19 @@ import com.esotericsoftware.minlog.Log;
 
 import java.io.IOException;
 
+/*
+    Создание и запуск самого сервера
+ */
 public class DSServer {
+    static public final int port = 54555;
+
     private Server server;
 
     public DSServer() throws IOException {
         server = new Server();
         registerPackets();
-        server.addListener(new NetworkListener());
-        server.bind(54555);
+        server.addListener(new Network());
+        server.bind(port);
         server.start();
 
     }
