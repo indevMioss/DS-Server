@@ -1,4 +1,4 @@
-package com.interdev.dsserver;
+package com.interdev.dsserver.lobby;
 
 import com.esotericsoftware.kryonet.Connection;
 

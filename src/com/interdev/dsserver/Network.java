@@ -3,18 +3,21 @@ package com.interdev.dsserver;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.minlog.Log;
+import com.interdev.dsserver.lobby.Lobby;
+import com.interdev.dsserver.lobby.WaitingPlayer;
+import com.interdev.dsserver.roomsystem.RoomManager;
 
 /*
     Все операции с пакетами. NetworkListener немного разросся по функционалу(Добавил поля Lobby и ConnectionsManager)
     так что переименовал в просто Network. Не знаю насколько правильно хранить тут поля с лобби и менеджером соединений.
  */
 public class Network extends Listener {
-    public static ConnectionsManager connectionsManager;
+    public static RoomManager roomManager;
     public static Lobby lobby;
 
 
     public Network() {
-        connectionsManager = new ConnectionsManager();
+        roomManager = new RoomManager();
         lobby = new Lobby();
     }
 
@@ -27,7 +30,7 @@ public class Network extends Listener {
         if (lobby.removeWaitingPlayerByConnection(connection)) {
             Log.info("Кто-то отключился от лобби");
         } else {
-            if(connectionsManager.removePair(connection)) {
+            if(roomManager.destroyRoom(connection)) {
                 Log.info("Кто-то отключился от игры");
             } else {
                 Log.info("Кто-то отключился хер пойми откуда");

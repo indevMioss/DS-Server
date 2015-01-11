@@ -1,7 +1,9 @@
-package com.interdev.dsserver;
+package com.interdev.dsserver.lobby;
 
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.minlog.Log;
+import com.interdev.dsserver.Network;
+
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -24,19 +26,19 @@ public class Lobby {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                tryToFormNewConnectionPair();
+                tryToFormNewRoom();
             }
         }, timerStartDelay, timerCheckInterval);
     }
 
-    public void tryToFormNewConnectionPair() {
+    public void tryToFormNewRoom() {
         Log.info("Количество игроков в лобби: " + waitingPlayersList.size());
         if (waitingPlayersList.size() < 2) return;
 
         WaitingPlayer waitingPlayer0 = waitingPlayersList.get(0);
         WaitingPlayer waitingPlayer1 = waitingPlayersList.get(1);
 
-        if (Network.connectionsManager.addPair(waitingPlayer0.connection, waitingPlayer1.connection)) {
+        if (Network.roomManager.makeNewRoom(waitingPlayer0.connection, waitingPlayer1.connection)) {
             removeWaitingPlayer(waitingPlayer0);
             removeWaitingPlayer(waitingPlayer1);
             Log.info("2 игрока объеденены и удалены из списка ожидания");
