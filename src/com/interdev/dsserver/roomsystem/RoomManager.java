@@ -25,13 +25,13 @@ public class RoomManager {
 
     public boolean destroyRoom(Connection connection) {
         for (Room room : rooms) {
-            if(room.connection1.equals(connection)) {
-                room.connection2.close();  //если отключился 1й игрок, то дисконнектим и второго
+            if(room.player1.connection.equals(connection)) {
+                room.player2.connection.close();  //если отключился 1й игрок, то дисконнектим и второго
                 rooms.remove(room);
                 return true;
             }
-            if(room.connection2.equals(connection)) {
-                room.connection1.close(); //если отключился 2й игрок, то дисконнектим и первого
+            if(room.player2.connection.equals(connection)) {
+                room.player1.connection.close(); //если отключился 2й игрок, то дисконнектим и первого
                 rooms.remove(room);
                 return true;
             }
@@ -39,10 +39,20 @@ public class RoomManager {
         return false;
     }
 
+    public Player findPlayer(Connection connection) {
+        for (Room room : rooms) {
+            if(room.player1.connection.equals(connection)) {
+                return room.player1;
+            } else if(room.player2.connection.equals(connection)) {
+                return room.player2;
+            }
+        }
+        return null;
+    }
 
     private boolean containsConnection(Connection connection) {
         for (Room room : rooms) {
-            if(room.connection1.equals(connection) || room.connection2.equals(connection)) {
+            if(room.player1.connection.equals(connection) || room.player2.connection.equals(connection)) {
                 return true;
             }
         }

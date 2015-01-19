@@ -5,6 +5,7 @@ import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.minlog.Log;
 import com.interdev.dsserver.lobby.Lobby;
 import com.interdev.dsserver.lobby.WaitingPlayer;
+import com.interdev.dsserver.roomsystem.Player;
 import com.interdev.dsserver.roomsystem.RoomManager;
 
 /*
@@ -39,15 +40,23 @@ public class Network extends Listener {
     }
 
     public void received(Connection connection, Object obj) {
-        if(obj instanceof Packet.Packet0LoginRequest) {
-            Packet.Packet1LoginAnswer loginAnswer = new Packet.Packet1LoginAnswer();
+        if(obj instanceof Packet.PacketLoginRequest) {
+            Packet.PacketLoginAnswer loginAnswer = new Packet.PacketLoginAnswer();
             loginAnswer.accepted = true;
             connection.sendTCP(loginAnswer);
         }
 
-        if(obj instanceof Packet.Packet2Message) {
-            String message = ((Packet.Packet2Message) obj).message;
+        if(obj instanceof Packet.PacketMessage) {
+            String message = ((Packet.PacketMessage) obj).message;
             Log.info(message);
+        }
+
+        if(obj instanceof Packet.PacketReadyToPlay) {
+            Player player = roomManager.findPlayer(connection);
+            if(player != null) {
+                player.iAmReady();
+            }
+
         }
     }
 
