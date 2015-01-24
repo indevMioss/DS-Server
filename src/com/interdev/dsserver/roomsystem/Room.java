@@ -43,11 +43,15 @@ public class Room {
         player1.act();
         player2.act();
 
-        Packet.PacketBattlefieldUnitsUpdate battlefieldUpdatePacket = new Packet.PacketBattlefieldUnitsUpdate();
-        battlefieldUpdatePacket.Player1PackedUnits = player1.getPackedUnits();
-        battlefieldUpdatePacket.Player2PackedUnits = player2.getPackedUnits();
-        player1.connection.sendTCP(battlefieldUpdatePacket);
-        player2.connection.sendTCP(battlefieldUpdatePacket);
+        Packet.PacketBattlefieldUnitsUpdate battlefieldUpdatePacket1 = new Packet.PacketBattlefieldUnitsUpdate();
+        battlefieldUpdatePacket1.Player1PackedUnits = player1.getPackedUnits();
+        battlefieldUpdatePacket1.Player2PackedUnits = player2.getPackedUnits();
+        player1.connection.sendTCP(battlefieldUpdatePacket1);
+
+        Packet.PacketBattlefieldUnitsUpdate battlefieldUpdatePacket2 = new Packet.PacketBattlefieldUnitsUpdate();
+        battlefieldUpdatePacket2.Player1PackedUnits = player2.getPackedUnits();
+        battlefieldUpdatePacket2.Player2PackedUnits = player1.getPackedUnits();
+        player2.connection.sendTCP(battlefieldUpdatePacket2);
 
         if (ticks * tickInterval >= spawnInterval) {
             ticks = 0;

@@ -48,4 +48,14 @@ public class Packet {
     public static class PacketAnswerUnitSell {
         public boolean answer;
     }
+
+    public static class PacketRequestUpgrade {
+        public short type;
+    }
+
+    public static class PacketAnswerUpgrade {
+        public boolean answer;
+    }
+
+
 }

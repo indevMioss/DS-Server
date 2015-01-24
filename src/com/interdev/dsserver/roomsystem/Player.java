@@ -81,6 +81,7 @@ public class Player {
             packedUnit.type = unit.type;
             packedUnit.x = unit.x;
             packedUnit.y = unit.y;
+            packedUnit.lives = unit.lives;
             packedUnit.id = unit.id;
             packedUnit.targetId = unit.targetId;
             packedUnitsArray[i] = packedUnit;
