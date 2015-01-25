@@ -1,10 +1,13 @@
 package com.interdev.dsserver.roomsystem;
 
 import com.esotericsoftware.kryonet.Connection;
-import com.google.common.primitives.Ints;
+import com.esotericsoftware.minlog.Log;
 import com.interdev.dsserver.PackedUnit;
+import com.interdev.dsserver.Packet;
 import com.interdev.dsserver.roomsystem.gamelogics.ActiveUnit;
 import com.interdev.dsserver.roomsystem.gamelogics.PassiveUnit;
+import com.interdev.dsserver.roomsystem.gamelogics.PlayerValues;
+import com.interdev.dsserver.roomsystem.gamelogics.UnitValues;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -20,11 +23,11 @@ public class Player {
     public int income;
     public float lives;
 
-    public int unitsIDsCounter = 0;
+    public int activeUnitsIDsCounter = 0;
+    public int passiveUnitsIDsCounter = 0;
+
     public ArrayList<ActiveUnit> activeUnitsList;
     public ArrayList<PassiveUnit> passiveUnitsList;
-
-    private ArrayList<Integer> deadUnitsIDsList;
 
     public Player(Connection connection, Room room, boolean baseAtTheTop) {
         this.connection = connection;
@@ -33,17 +36,22 @@ public class Player {
         this.baseAtTheTop = baseAtTheTop;
         activeUnitsList = new ArrayList<ActiveUnit>();
         passiveUnitsList = new ArrayList<PassiveUnit>();
-        deadUnitsIDsList = new ArrayList<Integer>();
 
-        lives = 100f;
-        money = 0;
-        income = 10;
+        lives = PlayerValues.BASE_START_LIVES;
+
+        money = PlayerValues.START_MONEY;
+        income = PlayerValues.INCOME_LVL1;
     }
 
     public void iAmReady() {
-        if(!ready) {
+        Log.info("iAmReady()");
+        if (!ready) {
+            Log.info("if (!ready)");
+
             ready = true;
             if (myRoom.getOppositePlayer(this).ready) {
+                Log.info(" if (myRoom.getOppositePlayer(this).ready)");
+
                 myRoom.start();
             }
         }
@@ -55,58 +63,87 @@ public class Player {
         }
     }
 
-    public void spawnUnit(short x, short y, short type) {
-        if(baseAtTheTop) {
-            unitsIDsCounter --;
+    private void spawnUnit(short x, short y, short type) {
+        if (baseAtTheTop) {
+            activeUnitsIDsCounter--;
         } else {
-            unitsIDsCounter ++;
+            activeUnitsIDsCounter++;
         }
-        ActiveUnit unit = new ActiveUnit(x, y, type, myRoom.getOppositePlayer(this), unitsIDsCounter);
+        ActiveUnit unit = new ActiveUnit(x, y, type, myRoom.getOppositePlayer(this), activeUnitsIDsCounter);
         activeUnitsList.add(unit);
     }
 
-    public void act() {
-        handleDeadUnits();
-
+    public void act(float deltaTime) {
         for (ActiveUnit unit : activeUnitsList) {
-            unit.act();
+            unit.act(deltaTime);
         }
     }
 
-    public PackedUnit[] getPackedUnits() {
+    public PackedUnit[] getPackedUnits(boolean inversed) {
         PackedUnit[] packedUnitsArray = new PackedUnit[activeUnitsList.size()];
         int i = 0;
         for (ActiveUnit unit : activeUnitsList) {
             PackedUnit packedUnit = new PackedUnit();
             packedUnit.type = unit.type;
-            packedUnit.x = unit.x;
-            packedUnit.y = unit.y;
+            if (inversed) {
+                packedUnit.x = (short) (PlayerValues.BATTLEFIELD_WIDTH - unit.x);
+                packedUnit.y = (short) (PlayerValues.TOTAL_FIELD_HEIGHT - unit.y);
+            } else {
+                packedUnit.x = unit.x;
+                packedUnit.y = unit.y;
+            }
             packedUnit.lives = unit.lives;
             packedUnit.id = unit.id;
             packedUnit.targetId = unit.targetId;
             packedUnitsArray[i] = packedUnit;
             i++;
         }
+        handleDeadUnits();
         return packedUnitsArray;
     }
 
     private void handleDeadUnits() {
-        deadUnitsIDsList.clear();
-        Iterator<ActiveUnit> deadUnitsIterator = activeUnitsList.iterator();
-        while (deadUnitsIterator.hasNext()) {
-            ActiveUnit unit = deadUnitsIterator.next();
+        Iterator<ActiveUnit> it = activeUnitsList.iterator();
+        while (it.hasNext()) {
+            ActiveUnit unit = it.next();
             if (unit.lives <= 0) {
-                unitDied(unit);
-                deadUnitsIterator.remove();
+                it.remove();
             }
         }
-
-        myRoom.sendDeadUnitsIDsPacket(Ints.toArray(deadUnitsIDsList));
-    }
-
-    public void unitDied(ActiveUnit unit) {
-        deadUnitsIDsList.add(unit.id);
     }
 
 
+    public void onUnitPurchaseRequest(Packet.PacketRequestUnitPurchase packet) {
+        if (money >= UnitValues.getByType(packet.type).price) {
+            Log.info("onUnitPurchaseRequest money >=");
+
+            money -= UnitValues.getByType(packet.type).price;
+
+            if (baseAtTheTop) {
+                passiveUnitsList.add(new PassiveUnit((short) (PlayerValues.BATTLEFIELD_WIDTH - packet.x), (short) (PlayerValues.TOTAL_FIELD_HEIGHT - packet.y), packet.type, ++passiveUnitsIDsCounter));
+            } else {
+                passiveUnitsList.add(new PassiveUnit(packet.x, packet.y, packet.type, ++passiveUnitsIDsCounter));
+            }
+
+            Packet.PacketAnswerUnitPurchase packt = new Packet.PacketAnswerUnitPurchase();
+            packt.id = passiveUnitsIDsCounter;
+            connection.sendTCP(packt);
+
+        } else {
+            Log.info("onUnitPurchaseRequest money <");
+            Packet.PacketAnswerUnitPurchase packt = new Packet.PacketAnswerUnitPurchase();
+            packt.id = 0;
+            connection.sendTCP(packt);
+
+        }
+    }
+
+
+    public void onUnitSellRequest(Packet.PacketRequestUnitSell packet) {
+
+    }
+
+    public void onUpgradeRequest(Packet.PacketRequestUpgrade packet) {
+
+    }
 }

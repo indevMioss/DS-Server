@@ -2,32 +2,31 @@ package com.interdev.dsserver.roomsystem.gamelogics;
 
 
 import com.interdev.dsserver.roomsystem.Player;
-import com.interdev.dsserver.roomsystem.Room;
 
 public class ActiveUnit extends Unit {
 
     public Player enemyPlayer;
-    public int id;
     public int targetId = 0; //no target
 
     private boolean haveTarget = false;
 
     private ActiveUnit targetUnit = null;
-    private int deltaTime = 0;
+    private int attackDeltaTime = 0;
 
     public ActiveUnit(short x, short y, short type, Player enemyPlayer, int id) {
         super(x, y, type);
-        this.id = id;
+        initUnitTypeValues();
 
+        this.id = id;
         this.enemyPlayer = enemyPlayer;
 
     }
 
-    public void act() {
-        deltaTime += Room.tickInterval;
+    public void act(float deltaTime) {
+        attackDeltaTime += deltaTime;
 
-        if(deltaTime >= atk_interval) {
-            deltaTime = 0;
+        if(attackDeltaTime >= atk_interval) {
+            attackDeltaTime = 0;
             if(!haveTarget) {
                 if(findTarget()) attack(targetUnit);
             } else if (isUnitAlive(targetUnit) && isDistanceReachable(targetUnit)) {
@@ -37,14 +36,15 @@ public class ActiveUnit extends Unit {
             }
         }
 
-        if (!haveTarget) move();
+        if (!haveTarget) move(deltaTime);
     }
 
-    private void move() {
+    private void move(float deltaTime) {
+        float secondDivider = deltaTime/1000f;
         if (enemyPlayer.baseAtTheTop) {
-            this.x += this.walk_speed;
+            this.y += this.walk_speed*secondDivider;
         } else {
-            this.x -= this.walk_speed;
+            this.y -= this.walk_speed*secondDivider;
         }
     }
 

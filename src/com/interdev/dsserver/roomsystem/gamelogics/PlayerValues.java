@@ -1,15 +1,25 @@
 package com.interdev.dsserver.roomsystem.gamelogics;
 
 
-public class PlayerValues {
+public final class PlayerValues {
+    public static final int BATTLEFIELD_WIDTH = 1024;
+    public static final int BATTLEFIELD_HEIGHT = 2048;
+    public static final int PERSONALFIELD_WIDTH = 1024;
+    public static final int PERSONALFIELD_HEIGHT = 1024;
+    public static final int TOTAL_FIELD_HEIGHT = BATTLEFIELD_HEIGHT + PERSONALFIELD_HEIGHT*2;
+
     public static final float INCOME_UPGRADE_PRICE = 100;
 
+    public static final int BASE_START_LIVES = 5000;
+    public static final int BASE_DAMAGE = 20;
+    public static final int START_MONEY = 100;
+
     //скорость добычи на X lvl (ресурса в сек.)
-    public static final float INCOME_LVL1 = 10;
-    public static final float INCOME_LVL2 = 11;
-    public static final float INCOME_LVL3 = 12;
-    public static final float INCOME_LVL4 = 13;
-    public static final float INCOME_LVL5 = 14;
+    public static final int INCOME_LVL1 = 10;
+    public static final int INCOME_LVL2 = 11;
+    public static final int INCOME_LVL3 = 12;
+    public static final int INCOME_LVL4 = 13;
+    public static final int INCOME_LVL5 = 14;
 
     //минимальное время между апрейдами
     public static final int INCOME_LVL2_BEFORE_UPGRADE_DELAY = 60000;

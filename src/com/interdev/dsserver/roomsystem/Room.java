@@ -2,17 +2,17 @@ package com.interdev.dsserver.roomsystem;
 
 
 import com.esotericsoftware.kryonet.Connection;
+import com.esotericsoftware.minlog.Log;
 import com.interdev.dsserver.Packet;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class Room {
-    public static final int battlefildWidth = 720;
-    public static final int battlefildHeight = 1280;
-    public static final int tickInterval = 100;//ms
+
+    public static final int tickInterval = 500;//ms
     public static final int actDelay = 50;//ms
-    public static final int spawnInterval = 20000;//ms
+    public static final int spawnInterval = 10000;//ms
 
 
     public int ticks = 0;
@@ -29,6 +29,8 @@ public class Room {
     }
 
     public void start() {
+        Log.info("start()");
+
         actTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
@@ -40,32 +42,29 @@ public class Room {
     public void act() {
         ticks++;
 
-        player1.act();
-        player2.act();
+        player1.act(tickInterval);
+        player2.act(tickInterval);
+
 
         Packet.PacketBattlefieldUnitsUpdate battlefieldUpdatePacket1 = new Packet.PacketBattlefieldUnitsUpdate();
-        battlefieldUpdatePacket1.Player1PackedUnits = player1.getPackedUnits();
-        battlefieldUpdatePacket1.Player2PackedUnits = player2.getPackedUnits();
+        battlefieldUpdatePacket1.Player1PackedUnits = player1.getPackedUnits(false);
+        battlefieldUpdatePacket1.Player2PackedUnits = player2.getPackedUnits(false);
         player1.connection.sendTCP(battlefieldUpdatePacket1);
 
         Packet.PacketBattlefieldUnitsUpdate battlefieldUpdatePacket2 = new Packet.PacketBattlefieldUnitsUpdate();
-        battlefieldUpdatePacket2.Player1PackedUnits = player2.getPackedUnits();
-        battlefieldUpdatePacket2.Player2PackedUnits = player1.getPackedUnits();
+        battlefieldUpdatePacket2.Player1PackedUnits = player2.getPackedUnits(true);
+        battlefieldUpdatePacket2.Player2PackedUnits = player1.getPackedUnits(true);
         player2.connection.sendTCP(battlefieldUpdatePacket2);
 
         if (ticks * tickInterval >= spawnInterval) {
+            Log.info("wave spawned");
             ticks = 0;
+            player1.spawnWave();
+            player2.spawnWave();
             player1.connection.sendTCP(new Packet.PacketWaveSpawned());
             player2.connection.sendTCP(new Packet.PacketWaveSpawned());
         }
 
-    }
-
-    public void sendDeadUnitsIDsPacket(int[] ids) {
-        Packet.PacketDeadUnitsIDs deadUnitsIDsPacket = new Packet.PacketDeadUnitsIDs();
-        deadUnitsIDsPacket.deadUnitsIDs = ids;
-        player1.connection.sendTCP(deadUnitsIDsPacket);
-        player2.connection.sendTCP(deadUnitsIDsPacket);
     }
 
     public Player getOppositePlayer(Player player) {

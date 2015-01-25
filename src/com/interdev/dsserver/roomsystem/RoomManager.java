@@ -1,6 +1,7 @@
 package com.interdev.dsserver.roomsystem;
 
 import com.esotericsoftware.kryonet.Connection;
+import com.interdev.dsserver.Packet;
 
 import java.util.ArrayList;
 
@@ -20,6 +21,11 @@ public class RoomManager {
         if(containsConnection(connection1) || containsConnection(connection2)) return false;
 
         rooms.add(new Room(connection1, connection2));
+
+        Packet.PacketRoomReady packet = new Packet.PacketRoomReady();
+        packet.tickInterval = Room.tickInterval;
+        connection1.sendTCP(packet);
+        connection2.sendTCP(packet);
         return true;
     }
 

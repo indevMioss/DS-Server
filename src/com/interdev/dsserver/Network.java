@@ -31,7 +31,7 @@ public class Network extends Listener {
         if (lobby.removeWaitingPlayerByConnection(connection)) {
             Log.info("Кто-то отключился от лобби");
         } else {
-            if(roomManager.destroyRoom(connection)) {
+            if (roomManager.destroyRoom(connection)) {
                 Log.info("Кто-то отключился от игры");
             } else {
                 Log.info("Кто-то отключился хер пойми откуда");
@@ -40,23 +40,21 @@ public class Network extends Listener {
     }
 
     public void received(Connection connection, Object obj) {
-        if(obj instanceof Packet.PacketLoginRequest) {
+        if (obj instanceof Packet.PacketLoginRequest) {
             Packet.PacketLoginAnswer loginAnswer = new Packet.PacketLoginAnswer();
             loginAnswer.accepted = true;
             connection.sendTCP(loginAnswer);
-        }
-
-        if(obj instanceof Packet.PacketMessage) {
-            String message = ((Packet.PacketMessage) obj).message;
-            Log.info(message);
-        }
-
-        if(obj instanceof Packet.PacketReadyToPlay) {
+        } else if (obj instanceof Packet.PacketReadyToPlay) {
             Player player = roomManager.findPlayer(connection);
-            if(player != null) {
+            if (player != null) {
                 player.iAmReady();
             }
-
+        } else if (obj instanceof Packet.PacketRequestUnitPurchase) {
+            roomManager.findPlayer(connection).onUnitPurchaseRequest((Packet.PacketRequestUnitPurchase) obj);
+        } else if (obj instanceof Packet.PacketRequestUnitSell) {
+            roomManager.findPlayer(connection).onUnitSellRequest((Packet.PacketRequestUnitSell) obj);
+        } else if (obj instanceof Packet.PacketRequestUpgrade) {
+            roomManager.findPlayer(connection).onUpgradeRequest((Packet.PacketRequestUpgrade) obj);
         }
     }
 

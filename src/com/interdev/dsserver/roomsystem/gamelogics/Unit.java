@@ -1,8 +1,10 @@
 package com.interdev.dsserver.roomsystem.gamelogics;
 
 public abstract class Unit {
+    public int id;
     public short x, y;
     public short type;
+
     public short lives;
     public short damage;
     public short atk_range;
@@ -14,20 +16,17 @@ public abstract class Unit {
         this.x = x;
         this.y = y;
         this.type = type;
-        initUnitTypeValues(type);
+
     }
 
-    private void initUnitTypeValues(short type) {
-        switch (type) {
-            case 0:
-                lives = UnitValues.Unit0.lives;
-                damage = UnitValues.Unit0.damage;
-                atk_range = UnitValues.Unit0.atk_range;
-                atk_interval = UnitValues.Unit0.atk_speed;
-                walk_speed = UnitValues.Unit0.walk_speed;
-                texture_width = UnitValues.Unit0.texture_width;
-                break;
+    public void initUnitTypeValues() {
+        UnitValues.UnitVal unitType = UnitValues.getByType(type);
+        lives = unitType.lives;
+        damage = unitType.damage;
+        atk_range = unitType.atk_range;
+        atk_interval = unitType.atk_speed;
+        walk_speed = unitType.walk_speed;
+        texture_width = unitType.texture_width;
 
-        }
     }
 }
