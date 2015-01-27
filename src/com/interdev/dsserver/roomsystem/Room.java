@@ -10,7 +10,7 @@ import java.util.TimerTask;
 
 public class Room {
 
-    public static final int tickInterval = 500;//ms
+    public static final int tickInterval = 250;//ms
     public static final int actDelay = 50;//ms
     public static final int spawnInterval = 10000;//ms
 

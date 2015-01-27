@@ -21,13 +21,14 @@ public class UnitValues {
         return unit1;
     }
 
-    public static class UnitVal {
+    public static abstract class UnitVal {
         public short price;
         public short lives;
         public short damage;
         public short atk_range; // 0 - ближний бой
-        public float atk_speed; // раз в X ms
+        public float atk_interval; // раз в X ms
         public short walk_speed; // виртуальных px/s
+        public short sight_distance = PlayerValues.BATTLEFIELD_WIDTH/2;
         public short texture_width;
     }
 
@@ -36,9 +37,9 @@ public class UnitValues {
             price = 100;
             lives = 60;
             damage = 5;
-            atk_range = 0; // 0 - ближний бой
-            atk_speed = 300; // раз в X ms
-            walk_speed = 50; // виртуальных px/s
+            atk_range = 0;
+            atk_interval = 500;
+            walk_speed = 50;
             texture_width = 80;
         }
 

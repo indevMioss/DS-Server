@@ -94,7 +94,7 @@ public class Player {
             }
             packedUnit.lives = unit.lives;
             packedUnit.id = unit.id;
-            packedUnit.targetId = unit.targetId;
+            packedUnit.targetId = unit.getTargetId();
             packedUnitsArray[i] = packedUnit;
             i++;
         }
