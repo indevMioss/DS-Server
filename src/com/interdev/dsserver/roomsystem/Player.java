@@ -83,26 +83,14 @@ public class Player {
         PackedUnit[] packedUnitsArray = new PackedUnit[activeUnitsList.size()];
         int i = 0;
         for (ActiveUnit unit : activeUnitsList) {
-            PackedUnit packedUnit = new PackedUnit();
-            packedUnit.type = unit.type;
-            if (inversed) {
-                packedUnit.x = (short) (PlayerValues.BATTLEFIELD_WIDTH - unit.x);
-                packedUnit.y = (short) (PlayerValues.TOTAL_FIELD_HEIGHT - unit.y);
-            } else {
-                packedUnit.x = unit.x;
-                packedUnit.y = unit.y;
-            }
-            packedUnit.lives = unit.lives;
-            packedUnit.id = unit.id;
-            packedUnit.targetId = unit.getTargetId();
+            PackedUnit packedUnit = new PackedUnit(unit, inversed);
             packedUnitsArray[i] = packedUnit;
             i++;
         }
-        handleDeadUnits();
         return packedUnitsArray;
     }
 
-    private void handleDeadUnits() {
+    public void handleDeadUnits() {
         Iterator<ActiveUnit> it = activeUnitsList.iterator();
         while (it.hasNext()) {
             ActiveUnit unit = it.next();

@@ -12,7 +12,7 @@ public class Room {
 
     public static final int tickInterval = 250;//ms
     public static final int actDelay = 50;//ms
-    public static final int spawnInterval = 10000;//ms
+    public static final int spawnInterval = 20000;//ms
 
 
     public int ticks = 0;
@@ -55,6 +55,9 @@ public class Room {
         battlefieldUpdatePacket2.Player1PackedUnits = player2.getPackedUnits(true);
         battlefieldUpdatePacket2.Player2PackedUnits = player1.getPackedUnits(true);
         player2.connection.sendTCP(battlefieldUpdatePacket2);
+
+        player1.handleDeadUnits();
+        player2.handleDeadUnits();
 
         if (ticks * tickInterval >= spawnInterval) {
             Log.info("wave spawned");

@@ -2,7 +2,6 @@ package com.interdev.dsserver;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Server;
-import com.esotericsoftware.minlog.Log;
 
 import java.io.IOException;
 
@@ -48,7 +47,7 @@ public class DSServer {
     public static void main(String[] args) {
         try {
             new DSServer();
-            Log.set(Log.LEVEL_DEBUG);
+          //  Log.set(Log.LEVEL_DEBUG);
         } catch (IOException e) {
             e.printStackTrace();
         }

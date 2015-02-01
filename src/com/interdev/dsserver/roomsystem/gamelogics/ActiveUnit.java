@@ -43,6 +43,10 @@ public class ActiveUnit extends Unit {
         if (attackDeltaTime >= atk_interval) {
             attackDeltaTime -= atk_interval;
             targetUnit.lives -= damage;
+            if (targetUnit.lives <= 0) {
+                haveTargetToAttack = false;
+                haveTargetToMove = false;
+            }
         }
 
     }
