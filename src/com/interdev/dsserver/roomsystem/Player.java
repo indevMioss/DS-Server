@@ -14,7 +14,7 @@ import java.util.Iterator;
 
 
 public class Player {
-    private Room myRoom;
+    public Room myRoom;
     public boolean ready = false;
     public Connection connection;
 

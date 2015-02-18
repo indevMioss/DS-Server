@@ -2,6 +2,7 @@ package com.interdev.dsserver;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Server;
+import com.interdev.dsserver.roomsystem.gamelogics.Grid;
 
 import java.io.IOException;
 
@@ -47,6 +48,7 @@ public class DSServer {
     public static void main(String[] args) {
         try {
             new DSServer();
+            Grid grid = new Grid(16, 32);
           //  Log.set(Log.LEVEL_DEBUG);
         } catch (IOException e) {
             e.printStackTrace();

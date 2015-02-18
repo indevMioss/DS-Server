@@ -16,11 +16,20 @@ public abstract class Unit {
 
     public short sight_distance;
     public short texture_width;
+    public short size_in_cells;
+
+    public short y_index;
+    public short x_index;
+
 
     protected Unit(short x, short y, short type) {
         this.x = x;
         this.y = y;
         this.type = type;
+        initUnitTypeValues();
+        size_in_cells = (short) (texture_width /  Grid.cell_size);
+        y_index = (short) (y/ Grid.cell_size);
+        x_index = (short) (x/ Grid.cell_size);
 
     }
 

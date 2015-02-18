@@ -4,6 +4,7 @@ package com.interdev.dsserver.roomsystem;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.minlog.Log;
 import com.interdev.dsserver.Packet;
+import com.interdev.dsserver.roomsystem.gamelogics.Grid;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -17,12 +18,14 @@ public class Room {
 
     public int ticks = 0;
     public Player player1, player2;
+    public Grid grid;
 
     public Timer actTimer;
 
     public Room(Connection connection1, Connection connection2) {
         player1 = new Player(connection1, this, false);
         player2 = new Player(connection2, this, true);
+        grid = new Grid(16, 64);
 
         actTimer = new Timer();
 

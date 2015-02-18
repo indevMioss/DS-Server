@@ -15,7 +15,6 @@ public class ActiveUnit extends Unit {
 
     public ActiveUnit(short x, short y, short type, Player enemyPlayer, int id) {
         super(x, y, type);
-        initUnitTypeValues();
 
         this.id = id;
         this.enemyPlayer = enemyPlayer;
@@ -24,9 +23,7 @@ public class ActiveUnit extends Unit {
 
     public void act(float deltaTime) {
         if (!haveTargetToAttack && !haveTargetToMove) {
-            if (findTargetToAttack()) {
-                attack(deltaTime);
-            } else if (findTargetToMove()) {
+            if (findTargetToMove()) {
                 moveToTarget(deltaTime);
             } else {
                 moveForward(deltaTime);
@@ -42,18 +39,19 @@ public class ActiveUnit extends Unit {
         attackDeltaTime += deltaTime;
         if (attackDeltaTime >= atk_interval) {
             attackDeltaTime -= atk_interval;
-            targetUnit.lives -= damage;
+            targetUnit.getDamage(damage);
             if (targetUnit.lives <= 0) {
                 haveTargetToAttack = false;
                 haveTargetToMove = false;
             }
         }
-
     }
 
-    private boolean findTargetToAttack() {
-
-        return false;
+    public void getDamage(int damage) {
+        this.lives -= damage;
+        if(this.lives <= 0) {
+            enemyPlayer.myRoom.grid.clearCells(x_index, y_index, this);
+        }
     }
 
     private boolean findTargetToMove() {
@@ -82,61 +80,70 @@ public class ActiveUnit extends Unit {
 
     private void moveForward(float deltaTime) {
         float secondDivider = deltaTime / 1000f;
+        float y_destination = 0;
         if (enemyPlayer.baseAtTheTop) {
-            this.y += this.walk_speed * secondDivider;
+            y_destination = y + this.walk_speed * secondDivider;
         } else {
-            this.y -= this.walk_speed * secondDivider;
+            y_destination = y - this.walk_speed * secondDivider;
         }
+        if(enemyPlayer.myRoom.grid.occupy(this, this.x, (short)y_destination))
+            this.y = (short)y_destination;
     }
+
 
     private void moveToTarget(float deltaTime) {
-        float secondDivider = deltaTime / 1000f;
+        float x_destination = 0;
+        float y_destination = 0;
 
-        float walk_component = walk_speed*secondDivider;
-        float walk_diag_xy_component = diag_walk_speed_xy_component*secondDivider;
+            float secondDivider = deltaTime / 1000f;
 
-        if (x < targetUnit.x && y < targetUnit.y) {
-            x += walk_diag_xy_component;
-            y += walk_diag_xy_component;
-            if (x > targetUnit.x) x = targetUnit.x;
-            if (y > targetUnit.y) y = targetUnit.y;
-        } else if (x > targetUnit.x && y > targetUnit.y) {
-            x -= walk_diag_xy_component;
-            y -= walk_diag_xy_component;
-            if (x < targetUnit.x) x = targetUnit.x;
-            if (y < targetUnit.y) y = targetUnit.y;
-        } else if (x < targetUnit.x && y > targetUnit.y) {
-            x += walk_diag_xy_component;
-            y -= walk_diag_xy_component;
-            if (x > targetUnit.x) x = targetUnit.x;
-            if (y < targetUnit.y) y = targetUnit.y;
-        } else if (x > targetUnit.x && y < targetUnit.y) {
-            x -= walk_diag_xy_component;
-            y += walk_diag_xy_component;
-            if (x < targetUnit.x) x = targetUnit.x;
-            if (y > targetUnit.y) y = targetUnit.y;
-        } else if(x < targetUnit.x) {
-            x += walk_component;
-            if ( x > targetUnit.x) x = targetUnit.x;
-        } else if(x > targetUnit.x) {
-            x -= walk_component;
-            if ( x < targetUnit.x) x = targetUnit.x;
-        } else if(y < targetUnit.y) {
-            y += walk_component;
-            if (y > targetUnit.y) y = targetUnit.y;
-        } else if(y > targetUnit.y) {
-            y -= walk_component;
-            if (y < targetUnit.y) y = targetUnit.y;
+            float walk_component = walk_speed * secondDivider;
+            float walk_diag_xy_component = diag_walk_speed_xy_component * secondDivider;
+
+            if (x < targetUnit.x && y < targetUnit.y) {
+                x_destination = x + walk_diag_xy_component;
+                y_destination = y + walk_diag_xy_component;
+                if (x > targetUnit.x) x_destination = targetUnit.x;
+                if (y > targetUnit.y) y_destination = targetUnit.y;
+            } else if (x > targetUnit.x && y > targetUnit.y) {
+                x_destination = x - walk_diag_xy_component;
+                y_destination = y - walk_diag_xy_component;
+                if (x < targetUnit.x) x_destination = targetUnit.x;
+                if (y < targetUnit.y) y_destination = targetUnit.y;
+            } else if (x < targetUnit.x && y > targetUnit.y) {
+                x_destination = x + walk_diag_xy_component;
+                y_destination = y - walk_diag_xy_component;
+                if (x > targetUnit.x) x_destination = targetUnit.x;
+                if (y < targetUnit.y) y_destination = targetUnit.y;
+            } else if (x > targetUnit.x && y < targetUnit.y) {
+                x_destination = x - walk_diag_xy_component;
+                y_destination = y + walk_diag_xy_component;
+                if (x < targetUnit.x) x_destination = targetUnit.x;
+                if (y > targetUnit.y) y_destination = targetUnit.y;
+            } else if (x < targetUnit.x) {
+                x_destination = x + walk_component;
+                if (x > targetUnit.x) x_destination = targetUnit.x;
+            } else if (x > targetUnit.x) {
+                x_destination = x - walk_component;
+                if (x < targetUnit.x) x_destination = targetUnit.x;
+            } else if (y < targetUnit.y) {
+                y_destination = y + walk_component;
+                if (y > targetUnit.y) y_destination = targetUnit.y;
+            } else if (y > targetUnit.y) {
+                y_destination = y - walk_component;
+                if (y < targetUnit.y) y_destination = targetUnit.y;
+            }
+        if(enemyPlayer.myRoom.grid.occupy(this, (short) x_destination, (short) y_destination)){
+            x = (short)x_destination;
+            y = (short)y_destination;
         }
 
-        if (isReachable(targetUnit, atk_range)) {
-            haveTargetToAttack = true;
-        }
-    }
-
-    private void step(short deltaX, short deltaY) {
+            if (isReachable(targetUnit, atk_range)) {
+                haveTargetToAttack = true;
+            }
 
     }
+
 
 
     private boolean isUnitAlive(ActiveUnit unit) {
