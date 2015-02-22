@@ -42,7 +42,7 @@ public class Grid {
         short y_index_dest = (short) (y_destination/ cell_size);
         short x_index_dest = (short) (x_destination / cell_size);
 
-        //
+        /*
         for(int i = 0; i < y_size; i ++) {
             for (int j = 0; j < x_size; j++) {
                 if(grid[i][j].owner != null)
@@ -54,6 +54,7 @@ public class Grid {
         }
         System.out.println();
         System.out.println();
+        */
         /*
         проверка, свободны ли клетки в конечной точке
         */

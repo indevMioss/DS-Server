@@ -4,6 +4,7 @@ package com.interdev.dsserver.roomsystem.gamelogics;
 public final class PlayerValues {
     public static final int BATTLEFIELD_WIDTH = 1024;
     public static final int BATTLEFIELD_HEIGHT = 2048;
+
     public static final int PERSONALFIELD_WIDTH = 1024;
     public static final int PERSONALFIELD_HEIGHT = 1024;
     public static final int TOTAL_FIELD_HEIGHT = BATTLEFIELD_HEIGHT + PERSONALFIELD_HEIGHT*2;

@@ -5,13 +5,14 @@ import com.interdev.dsserver.roomsystem.Player;
 
 public class ActiveUnit extends Unit {
 
-    public Player enemyPlayer;
+    public Player enemyPlayer; //просто ссылка на второго игрока, полезно
 
-    private ActiveUnit targetUnit = null;
-    private boolean haveTargetToMove = false;
-    private boolean haveTargetToAttack = false;
+    private ActiveUnit targetUnit = null; //ссылка на юнита, которого будем брать в цель для движения/атаки
+    private boolean haveTargetToMove = false; //метка того, что найдена цель для движения
+    private boolean haveTargetToAttack = false; //метка того, что найдена цель для атаки
 
-    private int attackDeltaTime = 0;
+    private int attackDeltaTime = 0; //счётчик времени чтобы знать когда ударять/стрелять вражеского юнита (а то каждый такт бил бы)
+
 
     public ActiveUnit(short x, short y, short type, Player enemyPlayer, int id) {
         super(x, y, type);
@@ -21,20 +22,22 @@ public class ActiveUnit extends Unit {
 
     }
 
+    //метод вызывается каждый такт, входная точка логики юнита
     public void act(float deltaTime) {
-        if (!haveTargetToAttack && !haveTargetToMove) {
-            if (findTargetToMove()) {
-                moveToTarget(deltaTime);
-            } else {
-                moveForward(deltaTime);
+        if (!haveTargetToAttack && !haveTargetToMove) { // если у тебя нет ни цели для атаки, ни цели для движения к ней..
+            if (findTargetToMove()) { // ..то попробуй найти цель для движения!
+                moveToTarget(deltaTime); // если нашел - ебашь к ней.
+            } else { // если же её нет
+                moveForward(deltaTime); // то просто пиздуй вперёд
             }
-        } else if (haveTargetToAttack) {
-            attack(deltaTime);
-        } else if (haveTargetToMove) {
-            moveToTarget(deltaTime);
+        } else if (haveTargetToAttack) { //если же цель для атаки всё-таки была..
+            attack(deltaTime); // ..то ебашь её!
+        } else if (haveTargetToMove) { //если цели для атаки не было, но была цель для движения..  [warning у IDE тут походу т.к. просто можно else-if убрать и будет то же самое, оставим как есть для наглядности]
+            moveToTarget(deltaTime); // ..то пиздуй к ней!
         }
     }
 
+    //метод для раздачи пиздюлей
     private void attack(float deltaTime) {
         attackDeltaTime += deltaTime;
         if (attackDeltaTime >= atk_interval) {
@@ -47,6 +50,7 @@ public class ActiveUnit extends Unit {
         }
     }
 
+    //метод для получения пиздюлей
     public void getDamage(int damage) {
         this.lives -= damage;
         if (this.lives <= 0) {
@@ -54,6 +58,7 @@ public class ActiveUnit extends Unit {
         }
     }
 
+    //метод нахождения ближайшей цели для движения
     private boolean findTargetToMove() {
         boolean foundTarget = false;
         float minDistanceSquare = Float.MAX_VALUE;
@@ -74,13 +79,15 @@ public class ActiveUnit extends Unit {
         return foundTarget;
     }
 
+    //метод для проверки в зоне ли досягаемости юнит, который передаём 1м арументом, 2 аргумент - дистанция [для экономии, зона поиска квадратная, а не круглая]
     private boolean isReachable(ActiveUnit unit, short distance) {
         return (Math.abs(x - unit.x) <= distance && (Math.abs(y - unit.y) <= distance));
     }
 
+    //метод для движения тупо вперед, если нет цели для атаки/движения
     private void moveForward(float deltaTime) {
         float secondDivider = deltaTime / 1000f;
-        float y_destination = 0;
+        float y_destination;
         if (enemyPlayer.baseAtTheTop) {
             y_destination = y + this.walk_speed * secondDivider;
         } else {
@@ -90,16 +97,16 @@ public class ActiveUnit extends Unit {
             this.y = (short) y_destination;
     }
 
-
+    //метод для движения к цели, работает до тех пор, пока цель не окажется в зоне досягаемости для атаки
     private void moveToTarget(float deltaTime) {
         if (targetUnit != null && targetUnit.lives > 0) {
-            float x_destination = 0;
-            float y_destination = 0;
+            float x_destination = x; //будущие новые координаты
+            float y_destination = y; //будущие новые координаты
 
-            float secondDivider = deltaTime / 1000f;
+            float secondDivider = deltaTime / 1000f; //множитель для постоянной скорости чтобы не зависеть от тикрейта сервера
 
-            float walk_component = walk_speed * secondDivider;
-            float walk_diag_xy_component = diag_walk_speed_xy_component * secondDivider;
+            float walk_component = walk_speed * secondDivider; //на сколько меняем координаты за один шаг если идём строго прямо/назад/влево/направо
+            float walk_diag_xy_component = diag_walk_speed_xy_component * secondDivider; //на сколько меняем координаты за один шаг если идём наискосок
 
             if (x < targetUnit.x && y < targetUnit.y) {
                 x_destination = x + walk_diag_xy_component;
@@ -134,9 +141,13 @@ public class ActiveUnit extends Unit {
                 y_destination = y - walk_component;
                 if (y < targetUnit.y) y_destination = targetUnit.y;
             } else return;
+
             if (enemyPlayer.myRoom.grid.occupy(this, (short) x_destination, (short) y_destination)) {
                 x = (short) x_destination;
                 y = (short) y_destination;
+                if (x_destination <= 0 || y_destination <= 0) {
+                    System.out.println("FUCK THIS SHIT!! " + x_destination + " " + y_destination); // Выкидываем инфу в лог если присвоились странные координаты
+                }
             }
 
             if (isReachable(targetUnit, atk_range)) {
@@ -148,11 +159,12 @@ public class ActiveUnit extends Unit {
 
     }
 
-
+    //проверка, живой ли юнит
     private boolean isUnitAlive(ActiveUnit unit) {
         return (unit.lives > 0);
     }
 
+    //метод для отправки пакетов
     public int getTargetId() {
         if (!haveTargetToAttack || targetUnit == null) return 0;
         return targetUnit.id;
