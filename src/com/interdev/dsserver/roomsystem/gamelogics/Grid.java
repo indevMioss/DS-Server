@@ -1,23 +1,39 @@
 package com.interdev.dsserver.roomsystem.gamelogics;
 
+
 /**
  * Created by Evg256 on 14.02.2015.
  */
 public class Grid {
     private Cell grid[][];
     public static final int cell_size = 64;
+    public int x_size;
+    public int y_size;
 
     public Grid(int x_size, int y_size) {
-         grid = new Cell[x_size][y_size];
+        this.x_size = x_size;
+        this.y_size = y_size;
+         grid = new Cell[y_size][x_size];
         int tx = 0, ty = 0;
-        for(int i = 0; i < x_size; i ++) {
-            for(int j = 0; j < y_size; j ++) {
+        for(int i = 0; i < y_size; i ++) {
+            for(int j = 0; j < x_size; j ++) {
                 grid[i][j] = new Cell(tx, ty);
                 tx += cell_size;
             }
             ty += cell_size;
             tx = 0;
         }
+        for(int i = 0; i < y_size; i ++) {
+            for (int j = 0; j < x_size; j++) {
+                if(grid[i][j].owner != null)
+                    System.out.print('1');
+                else
+                    System.out.print('0');
+            }
+            System.out.println();
+        }
+        System.out.println();
+        System.out.println();
     }
 
     public boolean occupy(ActiveUnit unit, short x_destination, short y_destination) {
@@ -25,9 +41,10 @@ public class Grid {
         short x_index = (short) (unit.x / cell_size);
         short y_index_dest = (short) (y_destination/ cell_size);
         short x_index_dest = (short) (x_destination / cell_size);
+
         //
-        for(int i = 0; i < 16; i ++) {
-            for (int j = 0; j < 64; j++) {
+        for(int i = 0; i < y_size; i ++) {
+            for (int j = 0; j < x_size; j++) {
                 if(grid[i][j].owner != null)
                     System.out.print('1');
                 else
@@ -42,16 +59,21 @@ public class Grid {
         */
         for(int i = 0; i < unit.size_in_cells; i ++) {
             for(int j = 0; j < unit.size_in_cells; j ++) {
-                if (grid[x_index_dest - i][y_index_dest + j].owner != null && grid[x_index_dest - i][y_index_dest + j].owner != unit) {
+                if (grid[y_index_dest - i][x_index_dest + j].owner != null && grid[y_index_dest - i][x_index_dest + j].owner != unit) {
                     return false;
                 }
             }
         }
-        clearCells(x_index, y_index, unit);
+        //очистка занятых ячеек
+        clearCells(unit);
+
         //заполнение сетки юнитом
+        short occupy_cells_val = 0;
         for(int i = 0; i < unit.size_in_cells; i ++) {
             for(int j = 0; j < unit.size_in_cells; j ++) {
-                grid[x_index - i][y_index + j].owner = unit;
+                grid[y_index - i][x_index + j].owner = unit;
+                unit.occupy_cells_list[occupy_cells_val] = grid[y_index - i][x_index + j];
+                occupy_cells_val ++;
             }
         }
         unit.x_index = x_index_dest;
@@ -59,17 +81,20 @@ public class Grid {
         return true;
     }
 
-    public void clearCells(short x_ind, short y_ind, ActiveUnit unit) {
-        //очистка клеток, занятых юнитом
-        for(int i = 0; i < unit.size_in_cells; i ++) {
-            for(int j = 0; j < unit.size_in_cells; j ++) {
-                grid[x_ind - i][y_ind + j].owner = null;
+
+    public void clearCells(ActiveUnit unit) {
+        for(int i = 0; i < unit.occupy_cells_list.length; i ++) {
+            if(unit.occupy_cells_list[i] != null) {
+                unit.occupy_cells_list[i].owner = null;
             }
         }
     }
 
 
-    private final class Cell {
+
+
+
+    protected final class Cell {
         public ActiveUnit owner = null;
         public int x;
         public int y;

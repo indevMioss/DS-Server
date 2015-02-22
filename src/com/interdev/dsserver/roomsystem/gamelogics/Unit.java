@@ -21,6 +21,8 @@ public abstract class Unit {
     public short y_index;
     public short x_index;
 
+    public Grid.Cell [] occupy_cells_list;
+
 
     protected Unit(short x, short y, short type) {
         this.x = x;
@@ -28,6 +30,7 @@ public abstract class Unit {
         this.type = type;
         initUnitTypeValues();
         size_in_cells = (short) (texture_width /  Grid.cell_size);
+        occupy_cells_list = new Grid.Cell[size_in_cells * 2];
         y_index = (short) (y/ Grid.cell_size);
         x_index = (short) (x/ Grid.cell_size);
 

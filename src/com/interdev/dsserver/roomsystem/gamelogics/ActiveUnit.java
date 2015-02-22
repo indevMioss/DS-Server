@@ -49,8 +49,8 @@ public class ActiveUnit extends Unit {
 
     public void getDamage(int damage) {
         this.lives -= damage;
-        if(this.lives <= 0) {
-            enemyPlayer.myRoom.grid.clearCells(x_index, y_index, this);
+        if (this.lives <= 0) {
+            enemyPlayer.myRoom.grid.clearCells(this);
         }
     }
 
@@ -86,14 +86,15 @@ public class ActiveUnit extends Unit {
         } else {
             y_destination = y - this.walk_speed * secondDivider;
         }
-        if(enemyPlayer.myRoom.grid.occupy(this, this.x, (short)y_destination))
-            this.y = (short)y_destination;
+        if (enemyPlayer.myRoom.grid.occupy(this, this.x, (short) y_destination))
+            this.y = (short) y_destination;
     }
 
 
     private void moveToTarget(float deltaTime) {
-        float x_destination = 0;
-        float y_destination = 0;
+        if (targetUnit != null && targetUnit.lives > 0) {
+            float x_destination = 0;
+            float y_destination = 0;
 
             float secondDivider = deltaTime / 1000f;
 
@@ -132,18 +133,20 @@ public class ActiveUnit extends Unit {
             } else if (y > targetUnit.y) {
                 y_destination = y - walk_component;
                 if (y < targetUnit.y) y_destination = targetUnit.y;
+            } else return;
+            if (enemyPlayer.myRoom.grid.occupy(this, (short) x_destination, (short) y_destination)) {
+                x = (short) x_destination;
+                y = (short) y_destination;
             }
-        if(enemyPlayer.myRoom.grid.occupy(this, (short) x_destination, (short) y_destination)){
-            x = (short)x_destination;
-            y = (short)y_destination;
-        }
 
             if (isReachable(targetUnit, atk_range)) {
                 haveTargetToAttack = true;
             }
+        } else {
+            haveTargetToMove = false;
+        }
 
     }
-
 
 
     private boolean isUnitAlive(ActiveUnit unit) {

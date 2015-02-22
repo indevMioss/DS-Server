@@ -48,7 +48,7 @@ public class DSServer {
     public static void main(String[] args) {
         try {
             new DSServer();
-            Grid grid = new Grid(16, 32);
+            //Grid grid = new Grid(16, 64);
           //  Log.set(Log.LEVEL_DEBUG);
         } catch (IOException e) {
             e.printStackTrace();
