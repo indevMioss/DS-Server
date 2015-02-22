@@ -40,7 +40,7 @@ public class UnitValues {
             atk_range = 128;
             atk_interval = 500;
             walk_speed = 50;
-            texture_width = 80;
+            texture_width = 64;
         }
 
     }
