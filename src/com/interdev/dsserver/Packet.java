@@ -1,6 +1,12 @@
 package com.interdev.dsserver;
 
+import com.interdev.dsserver.roomsystem.PackedCell;
+
 public class Packet {
+
+    public static class PacketCellsDebug {
+        public PackedCell cells[][];
+    }
 
     // Server ->> Client // ----------------------------------------------
 

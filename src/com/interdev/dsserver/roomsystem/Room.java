@@ -15,17 +15,25 @@ public class Room {
     public static final int actDelay = 50;//ms
     public static final int spawnInterval = 20000;//ms
 
+    public static final int gridSizeX = 16;
+    public static final int gridSizeY = 64;
+
 
     public int ticks = 0;
     public Player player1, player2;
+
     public Grid grid;
+
+    private PackedCell[][] packedCells; // DEBUG
 
     public Timer actTimer;
 
     public Room(Connection connection1, Connection connection2) {
         player1 = new Player(connection1, this, false);
         player2 = new Player(connection2, this, true);
-        grid = new Grid(16, 64);
+
+        grid = new Grid(gridSizeX, gridSizeY);
+        packedCells = new PackedCell[gridSizeY][gridSizeX]; // DEBUG
 
         actTimer = new Timer();
 
@@ -42,12 +50,23 @@ public class Room {
         }, actDelay, tickInterval);
     }
 
+
     public void act() {
         ticks++;
 
         player1.act(tickInterval);
         player2.act(tickInterval);
 
+        for(int i = 0; i < gridSizeY; i ++) {
+            for(int j = 0; j < gridSizeX; j ++) {
+                boolean free = (grid.grid[i][j].owner == null);
+                packedCells[i][j] = new PackedCell((short)grid.grid[i][j].x, (short)grid.grid[i][j].y, free);
+            }
+        }
+
+        Packet.PacketCellsDebug packetCellsDebug = new Packet.PacketCellsDebug();
+        packetCellsDebug.cells = packedCells;
+        player1.connection.sendTCP(packetCellsDebug);
 
         Packet.PacketBattlefieldUnitsUpdate battlefieldUpdatePacket1 = new Packet.PacketBattlefieldUnitsUpdate();
         battlefieldUpdatePacket1.Player1PackedUnits = player1.getPackedUnits(false);

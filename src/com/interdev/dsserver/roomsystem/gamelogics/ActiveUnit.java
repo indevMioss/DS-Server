@@ -140,7 +140,10 @@ public class ActiveUnit extends Unit {
             } else if (y > targetUnit.y) {
                 y_destination = y - walk_component;
                 if (y < targetUnit.y) y_destination = targetUnit.y;
-            } else return;
+            } else {
+                System.out.println("else { else { else { ... ");
+                return;
+            }
 
             if (enemyPlayer.myRoom.grid.occupy(this, (short) x_destination, (short) y_destination)) {
                 x = (short) x_destination;

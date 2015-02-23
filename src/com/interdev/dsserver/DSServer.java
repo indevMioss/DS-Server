@@ -2,7 +2,7 @@ package com.interdev.dsserver;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Server;
-import com.interdev.dsserver.roomsystem.gamelogics.Grid;
+import com.interdev.dsserver.roomsystem.PackedCell;
 
 import java.io.IOException;
 
@@ -25,6 +25,11 @@ public class DSServer {
 
     private void registerPackets() {
         Kryo kryo = server.getKryo();
+
+        kryo.register(PackedCell.class);
+        kryo.register(PackedCell[].class);
+        kryo.register(PackedCell[][].class);
+        kryo.register(Packet.PacketCellsDebug.class);
 
         kryo.register(Packet.PacketLoginAnswer.class);
         kryo.register(Packet.PacketRoomReady.class);

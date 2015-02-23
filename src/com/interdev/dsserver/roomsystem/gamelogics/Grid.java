@@ -5,7 +5,7 @@ package com.interdev.dsserver.roomsystem.gamelogics;
  * Created by Evg256 on 14.02.2015.
  */
 public class Grid {
-    private Cell grid[][];
+    public Cell grid[][];
     public static final int cell_size = 64;
     public int x_size;
     public int y_size;
@@ -95,7 +95,7 @@ public class Grid {
 
 
 
-    protected final class Cell {
+    public class Cell {
         public ActiveUnit owner = null;
         public int x;
         public int y;
@@ -105,4 +105,5 @@ public class Grid {
             this.y = y;
         }
     }
+
 }
