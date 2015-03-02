@@ -23,20 +23,14 @@ public class Grid {
             ty += cell_size;
             tx = 0;
         }
-        for (int i = 0; i < y_size; i++) {
-            for (int j = 0; j < x_size; j++) {
-                if (grid[i][j].owner != null)
-                    System.out.print('1');
-                else
-                    System.out.print('0');
-            }
-            System.out.println();
-        }
-        System.out.println();
-        System.out.println();
     }
 
     public boolean occupy(ActiveUnit unit, short x_destination, short y_destination) {
+        if(x_destination < 0 || x_destination > PlayerValues.BATTLEFIELD_WIDTH) {
+            return  false;
+        }else if(y_destination < 0 || y_destination > PlayerValues.TOTAL_FIELD_HEIGHT) {
+            return false;
+        }
 
         short start_y = (short) (y_destination + unit.texture_width / 2);
         short start_x = (short) (x_destination - unit.texture_width / 2);

@@ -93,8 +93,12 @@ public class ActiveUnit extends Unit {
         } else {
             y_destination = y - this.walk_speed * secondDivider;
         }
-        if (enemyPlayer.myRoom.grid.occupy(this, this.x, (short) y_destination))
+        if (enemyPlayer.myRoom.grid.occupy(this, this.x, (short) y_destination)) {
             this.y = (short) y_destination;
+        } else {
+            // движение в бок поиск пути
+            moveSideWay(deltaTime);
+        }
     }
 
     //метод для движения к цели, работает до тех пор, пока цель не окажется в зоне досягаемости для атаки
@@ -148,9 +152,9 @@ public class ActiveUnit extends Unit {
             if (enemyPlayer.myRoom.grid.occupy(this, (short) x_destination, (short) y_destination)) {
                 x = (short) x_destination;
                 y = (short) y_destination;
-                if (x_destination <= 0 || y_destination <= 0) {
-                    System.out.println("FUCK THIS SHIT!! " + x_destination + " " + y_destination); // Выкидываем инфу в лог если присвоились странные координаты
-                }
+            } else {
+                // движение в бок поиск пути
+                moveSideWay(deltaTime);
             }
 
             if (isReachable(targetUnit, atk_range)) {
@@ -159,6 +163,26 @@ public class ActiveUnit extends Unit {
         } else {
             haveTargetToMove = false;
         }
+    }
+
+    void moveSideWay(float deltaTime) {
+        short side = 1;
+        if((Math.random() * 10) > 4) {
+            side = -1;
+        }
+        float x_destination = x; //будущие новые координаты
+        float secondDivider = deltaTime / 1000f; //множитель для постоянной скорости чтобы не зависеть от тикрейта сервера
+        float walk_component = walk_speed * secondDivider; //на сколько меняем координаты за один шаг если идём строго прямо/назад/влево/направо
+        x_destination += walk_component;
+        if (enemyPlayer.baseAtTheTop) {
+            x_destination = x + (this.walk_speed * secondDivider) * side;
+        } else {
+            x_destination = x - (this.walk_speed * secondDivider) * side;
+        }
+        if (enemyPlayer.myRoom.grid.occupy(this, (short) x_destination, this.y)) {
+            this.x = (short) x_destination;
+        }
+
     }
 
     //проверка, живой ли юнит

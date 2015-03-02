@@ -28,7 +28,21 @@ public abstract class Unit {
         this.type = type;
         initUnitTypeValues();
         size_in_cells = (short) (texture_width /  Grid.cell_size);
-        occupy_cells_list = new Grid.Cell[size_in_cells * 4];
+
+        switch(size_in_cells) {
+            case 1:
+                occupy_cells_list = new Grid.Cell[4];
+                break;
+            case 2:
+                occupy_cells_list = new Grid.Cell[9];
+                break;
+            case 3:
+                occupy_cells_list = new Grid.Cell[16];
+                break;
+            default:
+                occupy_cells_list = new Grid.Cell[50];
+                System.err.print("Unit cells array not specified for this size");
+        }
     }
 
     public void initUnitTypeValues() {
