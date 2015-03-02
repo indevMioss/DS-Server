@@ -159,7 +159,6 @@ public class ActiveUnit extends Unit {
         } else {
             haveTargetToMove = false;
         }
-
     }
 
     //проверка, живой ли юнит

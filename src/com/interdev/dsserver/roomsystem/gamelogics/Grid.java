@@ -13,19 +13,19 @@ public class Grid {
     public Grid(int x_size, int y_size) {
         this.x_size = x_size;
         this.y_size = y_size;
-         grid = new Cell[y_size][x_size];
+        grid = new Cell[y_size][x_size];
         int tx = 0, ty = 0;
-        for(int i = 0; i < y_size; i ++) {
-            for(int j = 0; j < x_size; j ++) {
+        for (int i = 0; i < y_size; i++) {
+            for (int j = 0; j < x_size; j++) {
                 grid[i][j] = new Cell(tx, ty);
                 tx += cell_size;
             }
             ty += cell_size;
             tx = 0;
         }
-        for(int i = 0; i < y_size; i ++) {
+        for (int i = 0; i < y_size; i++) {
             for (int j = 0; j < x_size; j++) {
-                if(grid[i][j].owner != null)
+                if (grid[i][j].owner != null)
                     System.out.print('1');
                 else
                     System.out.print('0');
@@ -37,62 +37,58 @@ public class Grid {
     }
 
     public boolean occupy(ActiveUnit unit, short x_destination, short y_destination) {
-        short y_index = (short) (unit.y/ cell_size);
-        short x_index = (short) (unit.x / cell_size);
-        short y_index_dest = (short) (y_destination/ cell_size);
-        short x_index_dest = (short) (x_destination / cell_size);
 
-        /*
-        for(int i = 0; i < y_size; i ++) {
-            for (int j = 0; j < x_size; j++) {
-                if(grid[i][j].owner != null)
-                    System.out.print('1');
-                else
-                    System.out.print('0');
-            }
-            System.out.println();
-        }
-        System.out.println();
-        System.out.println();
-        */
+        short start_y = (short) (y_destination + unit.texture_width / 2);
+        short start_x = (short) (x_destination - unit.texture_width / 2);
+
+        short end_y = (short) (y_destination - unit.texture_width / 2);
+        short end_x = (short) (x_destination + unit.texture_width / 2);
+
+
+        short y_start_index = (short) (start_y / cell_size);
+        short x_start_index = (short) (start_x / cell_size);
+
+
+        short y_end_index = (short) (end_y / cell_size);
+        short x_end_index = (short) (end_x / cell_size);
+
+
+
+
         /*
         проверка, свободны ли клетки в конечной точке
         */
-        for(int i = 0; i < unit.size_in_cells; i ++) {
-            for(int j = 0; j < unit.size_in_cells; j ++) {
-                if (grid[y_index_dest - i][x_index_dest + j].owner != null && grid[y_index_dest - i][x_index_dest + j].owner != unit) {
+        for (int i = 0; i <= Math.abs(y_start_index - y_end_index); i++) {
+            for (int j = 0; j <= Math.abs(x_start_index - x_end_index); j++) {
+                if (grid[y_start_index - i][x_start_index + j].owner != null && grid[y_start_index - i][x_start_index + j].owner != unit) {
                     return false;
                 }
             }
         }
+
         //очистка занятых ячеек
         clearCells(unit);
 
         //заполнение сетки юнитом
         short occupy_cells_val = 0;
-        for(int i = 0; i < unit.size_in_cells; i ++) {
-            for(int j = 0; j < unit.size_in_cells; j ++) {
-                grid[y_index - i][x_index + j].owner = unit;
-                unit.occupy_cells_list[occupy_cells_val] = grid[y_index - i][x_index + j];
-                occupy_cells_val ++;
+        for (int i = 0; i <= Math.abs(y_start_index - y_end_index); i++) {
+            for (int j = 0; j <= Math.abs(x_start_index - x_end_index); j++) {
+                grid[y_start_index - i][x_start_index + j].owner = unit;
+                unit.occupy_cells_list[occupy_cells_val] = grid[y_start_index - i][x_start_index + j];
+                occupy_cells_val++;
             }
         }
-        unit.x_index = x_index_dest;
-        unit.y_index = y_index_dest;
         return true;
     }
 
 
     public void clearCells(ActiveUnit unit) {
-        for(int i = 0; i < unit.occupy_cells_list.length; i ++) {
-            if(unit.occupy_cells_list[i] != null) {
+        for (int i = 0; i < unit.occupy_cells_list.length; i++) {
+            if (unit.occupy_cells_list[i] != null) {
                 unit.occupy_cells_list[i].owner = null;
             }
         }
     }
-
-
-
 
 
     public class Cell {
