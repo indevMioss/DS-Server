@@ -26,9 +26,15 @@ public class Grid {
     }
 
     public boolean occupy(ActiveUnit unit, short x_destination, short y_destination) {
-        if(x_destination < 0 || x_destination > PlayerValues.BATTLEFIELD_WIDTH) {
+        if((x_destination - unit.texture_width / 2) < 0 || (x_destination + unit.texture_width / 2) > PlayerValues.BATTLEFIELD_WIDTH) {
+            unit.way_blocked = false;
+            unit.side *= -1;
             return  false;
-        }else if(y_destination < 0 || y_destination > PlayerValues.TOTAL_FIELD_HEIGHT) {
+        }
+
+        if((y_destination - unit.texture_width / 2) < 0 || (y_destination + unit.texture_width / 2) > PlayerValues.TOTAL_FIELD_HEIGHT) {
+            unit.way_blocked = false;
+            unit.side *= -1;
             return false;
         }
 
@@ -54,7 +60,13 @@ public class Grid {
         */
         for (int i = 0; i <= Math.abs(y_start_index - y_end_index); i++) {
             for (int j = 0; j <= Math.abs(x_start_index - x_end_index); j++) {
-                if (grid[y_start_index - i][x_start_index + j].owner != null && grid[y_start_index - i][x_start_index + j].owner != unit) {
+                try {
+                    if (grid[y_start_index - i][x_start_index + j].owner != null && grid[y_start_index - i][x_start_index + j].owner != unit) {
+                        unit.way_blocked = false;
+                        return false;
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                    System.err.print("IndexOutOfBoundsException caught");
                     return false;
                 }
             }
@@ -72,6 +84,7 @@ public class Grid {
                 occupy_cells_val++;
             }
         }
+        unit.way_blocked = true;
         return true;
     }
 

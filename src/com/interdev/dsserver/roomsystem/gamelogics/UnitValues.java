@@ -36,7 +36,7 @@ public class UnitValues {
         private Unit1Values() {
             price = 100;
             lives = 60;
-            damage = 10;
+            damage = 30;
             atk_range = 128;
             atk_interval = 500;
             walk_speed = 50;

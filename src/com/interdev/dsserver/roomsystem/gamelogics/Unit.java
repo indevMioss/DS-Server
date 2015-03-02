@@ -18,6 +18,9 @@ public abstract class Unit {
     public short texture_width;
     public short size_in_cells;
 
+    short side = 1;
+    boolean way_blocked = false;
+
 
     public Grid.Cell [] occupy_cells_list;
 

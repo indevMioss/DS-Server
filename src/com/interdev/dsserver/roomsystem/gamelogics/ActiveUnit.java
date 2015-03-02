@@ -3,6 +3,8 @@ package com.interdev.dsserver.roomsystem.gamelogics;
 
 import com.interdev.dsserver.roomsystem.Player;
 
+import java.util.Random;
+
 public class ActiveUnit extends Unit {
 
     public Player enemyPlayer; //просто ссылка на второго игрока, полезно
@@ -12,6 +14,8 @@ public class ActiveUnit extends Unit {
     private boolean haveTargetToAttack = false; //метка того, что найдена цель для атаки
 
     private int attackDeltaTime = 0; //счётчик времени чтобы знать когда ударять/стрелять вражеского юнита (а то каждый такт бил бы)
+
+    private Random random = new Random();
 
 
     public ActiveUnit(short x, short y, short type, Player enemyPlayer, int id) {
@@ -95,6 +99,11 @@ public class ActiveUnit extends Unit {
         }
         if (enemyPlayer.myRoom.grid.occupy(this, this.x, (short) y_destination)) {
             this.y = (short) y_destination;
+            if(way_blocked) {
+                if (random.nextBoolean()) {
+                    side *= -1;
+                }
+            }
         } else {
             // движение в бок поиск пути
             moveSideWay(deltaTime);
@@ -152,6 +161,11 @@ public class ActiveUnit extends Unit {
             if (enemyPlayer.myRoom.grid.occupy(this, (short) x_destination, (short) y_destination)) {
                 x = (short) x_destination;
                 y = (short) y_destination;
+                if(way_blocked) {
+                    if (random.nextBoolean()) {
+                        side *= -1;
+                    }
+                }
             } else {
                 // движение в бок поиск пути
                 moveSideWay(deltaTime);
@@ -166,10 +180,6 @@ public class ActiveUnit extends Unit {
     }
 
     void moveSideWay(float deltaTime) {
-        short side = 1;
-        if((Math.random() * 10) > 4) {
-            side = -1;
-        }
         float x_destination = x; //будущие новые координаты
         float secondDivider = deltaTime / 1000f; //множитель для постоянной скорости чтобы не зависеть от тикрейта сервера
         float walk_component = walk_speed * secondDivider; //на сколько меняем координаты за один шаг если идём строго прямо/назад/влево/направо
