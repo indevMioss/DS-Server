@@ -191,6 +191,8 @@ public class ActiveUnit extends Unit {
         }
         if (enemyPlayer.myRoom.grid.occupy(this, (short) x_destination, this.y)) {
             this.x = (short) x_destination;
+        } else {
+            side *= -1;
         }
 
     }
