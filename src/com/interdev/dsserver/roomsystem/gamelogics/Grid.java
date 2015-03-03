@@ -28,13 +28,11 @@ public class Grid {
     public boolean occupy(ActiveUnit unit, short x_destination, short y_destination) {
         if((x_destination - unit.texture_width / 2) < 0 || (x_destination + unit.texture_width / 2) > PlayerValues.BATTLEFIELD_WIDTH) {
             unit.way_blocked = false;
-            unit.side *= -1;
             return  false;
         }
 
         if((y_destination - unit.texture_width / 2) < 0 || (y_destination + unit.texture_width / 2) > PlayerValues.TOTAL_FIELD_HEIGHT) {
             unit.way_blocked = false;
-            unit.side *= -1;
             return false;
         }
 
