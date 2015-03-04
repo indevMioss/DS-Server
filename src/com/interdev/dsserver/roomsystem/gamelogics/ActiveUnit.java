@@ -28,16 +28,18 @@ public class ActiveUnit extends Unit {
 
     //метод вызывается каждый такт, входная точка логики юнита
     public void act(float deltaTime) {
-        if (!haveTargetToAttack && !haveTargetToMove) { // если у тебя нет ни цели для атаки, ни цели для движения к ней..
-            if (findTargetToMove()) { // ..то попробуй найти цель для движения!
-                moveToTarget(deltaTime); // если нашел - ебашь к ней.
-            } else { // если же её нет
-                moveForward(deltaTime); // то просто пиздуй вперёд
+        if (isAlive()) {
+            if (!haveTargetToAttack && !haveTargetToMove) { // если у тебя нет ни цели для атаки, ни цели для движения к ней..
+                if (findTargetToMove()) { // ..то попробуй найти цель для движения!
+                    moveToTarget(deltaTime); // если нашел - ебашь к ней.
+                } else { // если же её нет
+                    moveForward(deltaTime); // то просто пиздуй вперёд
+                }
+            } else if (haveTargetToAttack) { //если же цель для атаки всё-таки была..
+                attack(deltaTime); // ..то ебашь её!
+            } else if (haveTargetToMove) { //если цели для атаки не было, но была цель для движения..  [warning у IDE тут походу т.к. просто можно else-if убрать и будет то же самое, оставим как есть для наглядности]
+                moveToTarget(deltaTime); // ..то пиздуй к ней!
             }
-        } else if (haveTargetToAttack) { //если же цель для атаки всё-таки была..
-            attack(deltaTime); // ..то ебашь её!
-        } else if (haveTargetToMove) { //если цели для атаки не было, но была цель для движения..  [warning у IDE тут походу т.к. просто можно else-if убрать и будет то же самое, оставим как есть для наглядности]
-            moveToTarget(deltaTime); // ..то пиздуй к ней!
         }
     }
 
@@ -47,7 +49,7 @@ public class ActiveUnit extends Unit {
         if (attackDeltaTime >= atk_interval) {
             attackDeltaTime -= atk_interval;
             targetUnit.getDamage(damage);
-            if (targetUnit.lives <= 0) {
+            if (!targetUnit.isAlive()) {
                 haveTargetToAttack = false;
                 haveTargetToMove = false;
             }
@@ -57,7 +59,7 @@ public class ActiveUnit extends Unit {
     //метод для получения пиздюлей
     public void getDamage(int damage) {
         this.lives -= damage;
-        if (this.lives <= 0) {
+        if (!this.isAlive()) {
             enemyPlayer.myRoom.grid.clearCells(this);
         }
     }
@@ -69,7 +71,7 @@ public class ActiveUnit extends Unit {
         float sqrDist;
 
         for (ActiveUnit unit : enemyPlayer.activeUnitsList) {
-            if (isUnitAlive(unit) && isReachable(unit, sight_distance)) {
+            if (unit.isAlive() && isReachable(unit, sight_distance)) {
                 sqrDist = (float) (Math.pow(x - unit.x, 2) + Math.pow(y - unit.y, 2));
                 if (sqrDist < minDistanceSquare) {
                     minDistanceSquare = sqrDist;
@@ -99,7 +101,7 @@ public class ActiveUnit extends Unit {
         }
         if (enemyPlayer.myRoom.grid.occupy(this, this.x, (short) y_destination)) {
             this.y = (short) y_destination;
-            if(way_blocked) {
+            if (way_blocked) {
                 if (random.nextBoolean()) {
                     side *= -1;
                 }
@@ -112,7 +114,7 @@ public class ActiveUnit extends Unit {
 
     //метод для движения к цели, работает до тех пор, пока цель не окажется в зоне досягаемости для атаки
     private void moveToTarget(float deltaTime) {
-        if (targetUnit != null && targetUnit.lives > 0) {
+        if (targetUnit != null && targetUnit.isAlive()) {
             float x_destination = x; //будущие новые координаты
             float y_destination = y; //будущие новые координаты
 
@@ -161,7 +163,7 @@ public class ActiveUnit extends Unit {
             if (enemyPlayer.myRoom.grid.occupy(this, (short) x_destination, (short) y_destination)) {
                 x = (short) x_destination;
                 y = (short) y_destination;
-                if(way_blocked) {
+                if (way_blocked) {
                     if (random.nextBoolean()) {
                         side *= -1;
                     }
@@ -198,8 +200,8 @@ public class ActiveUnit extends Unit {
     }
 
     //проверка, живой ли юнит
-    private boolean isUnitAlive(ActiveUnit unit) {
-        return (unit.lives > 0);
+    public boolean isAlive() {
+        return (lives > 0);
     }
 
     //метод для отправки пакетов

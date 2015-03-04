@@ -56,7 +56,7 @@ public class UnitValues {
             damage = 30;
             atk_range = 150; // 0 - ближний бой
             atk_interval = 500; // раз в X ms
-            walk_speed = 20; // виртуальных px/s
+            walk_speed = 60; // виртуальных px/s
             texture_width = 64;
 
             texturePath = "unit0.png";

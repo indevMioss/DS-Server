@@ -94,7 +94,7 @@ public class Player {
         Iterator<ActiveUnit> it = activeUnitsList.iterator();
         while (it.hasNext()) {
             ActiveUnit unit = it.next();
-            if (unit.lives <= 0) {
+            if (!unit.isAlive()) {
                 it.remove();
             }
         }
