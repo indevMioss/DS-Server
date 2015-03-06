@@ -33,6 +33,8 @@ public class DSServer {
 
         kryo.register(Packet.PacketLoginAnswer.class);
         kryo.register(Packet.PacketRoomReady.class);
+        kryo.register(Packet.PacketRoomDestroyed.class);
+
         kryo.register(PackedUnit.class);
         kryo.register(PackedUnit[].class);
         kryo.register(Packet.PacketBattlefieldUnitsUpdate.class);

@@ -29,12 +29,12 @@ public class Network extends Listener {
 
     public void disconnected(Connection connection) {
         if (lobby.removeWaitingPlayerByConnection(connection)) {
-            Log.info("Кто-то отключился от лобби");
+            Log.info("Кто-то разорвал соединение находясь в лобби");
         } else {
             if (roomManager.destroyRoom(connection)) {
-                Log.info("Кто-то отключился от игры");
+                Log.info("Кто-то разорвал соединение находясь в руме");
             } else {
-                Log.info("Кто-то отключился хер пойми откуда");
+                Log.info("Кто-то разорвал соединение не находясь(больше?) в руме");
             }
         }
     }

@@ -18,6 +18,9 @@ public class Packet {
         public int tickInterval;
     }
 
+    public static class PacketRoomDestroyed {
+    }
+
     public static class PacketBattlefieldUnitsUpdate {
         public PackedUnit[] Player1PackedUnits;
         public PackedUnit[] Player2PackedUnits;

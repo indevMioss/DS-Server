@@ -4,6 +4,7 @@ import com.esotericsoftware.kryonet.Connection;
 import com.interdev.dsserver.Packet;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /*
     Менеджер румов
@@ -30,15 +31,12 @@ public class RoomManager {
     }
 
     public boolean destroyRoom(Connection connection) {
-        for (Room room : rooms) {
-            if(room.player1.connection.equals(connection)) {
-                room.player2.connection.close();  //если отключился 1й игрок, то дисконнектим и второго
-                rooms.remove(room);
-                return true;
-            }
-            if(room.player2.connection.equals(connection)) {
-                room.player1.connection.close(); //если отключился 2й игрок, то дисконнектим и первого
-                rooms.remove(room);
+        Iterator<Room> it = rooms.iterator();
+        while (it.hasNext()) {
+            Room room = it.next();
+            if (room.player1.connection.equals(connection) || room.player2.connection.equals(connection)) {
+                room.destroy();
+                it.remove();
                 return true;
             }
         }

@@ -41,6 +41,8 @@ public class Room {
 
     public void start() {
         Log.info("start()");
+        player1.connection.sendTCP(new Packet.PacketWaveSpawned()); //для синхронизации таймеров
+        player2.connection.sendTCP(new Packet.PacketWaveSpawned());
 
         actTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
@@ -57,10 +59,10 @@ public class Room {
         player1.act(tickInterval);
         player2.act(tickInterval);
 
-        for(int i = 0; i < gridSizeY; i ++) {
-            for(int j = 0; j < gridSizeX; j ++) {
+        for (int i = 0; i < gridSizeY; i++) {
+            for (int j = 0; j < gridSizeX; j++) {
                 boolean free = (grid.grid[i][j].owner == null);
-                packedCells[i][j] = new PackedCell((short)grid.grid[i][j].x, (short)grid.grid[i][j].y, free);
+                packedCells[i][j] = new PackedCell((short) grid.grid[i][j].x, (short) grid.grid[i][j].y, free);
             }
         }
 
@@ -100,6 +102,12 @@ public class Room {
             return player1;
         }
         return null;
+    }
+
+    public void destroy() {
+        actTimer.cancel();
+        player1.connection.sendTCP(new Packet.PacketRoomDestroyed());
+        player2.connection.sendTCP(new Packet.PacketRoomDestroyed());
     }
 
 }
