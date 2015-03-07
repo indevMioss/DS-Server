@@ -19,7 +19,9 @@ public class Room {
     public static final int gridSizeY = 64;
 
 
-    public int ticks = 0;
+    public int unitsTicks = 0;
+    public int incomeTicks = 0;
+
     public Player player1, player2;
 
     public Grid grid;
@@ -54,10 +56,19 @@ public class Room {
 
 
     public void act() {
-        ticks++;
+        unitsTicks++;
+        incomeTicks++;
 
         player1.act(tickInterval);
         player2.act(tickInterval);
+
+        if (incomeTicks * tickInterval >= 1000) {
+            System.out.println("tick income " + incomeTicks);
+            player1.money += player1.income;
+            player2.money += player2.income;
+            incomeTicks = 0;
+        }
+
 
         for (int i = 0; i < gridSizeY; i++) {
             for (int j = 0; j < gridSizeX; j++) {
@@ -70,22 +81,26 @@ public class Room {
         packetCellsDebug.cells = packedCells;
         player1.connection.sendTCP(packetCellsDebug);
 
-        Packet.PacketBattlefieldUnitsUpdate battlefieldUpdatePacket1 = new Packet.PacketBattlefieldUnitsUpdate();
-        battlefieldUpdatePacket1.Player1PackedUnits = player1.getPackedUnits(false);
-        battlefieldUpdatePacket1.Player2PackedUnits = player2.getPackedUnits(false);
-        player1.connection.sendTCP(battlefieldUpdatePacket1);
+        Packet.PacketGameUpdate gameUpdatePacket1 = new Packet.PacketGameUpdate();
+        gameUpdatePacket1.money = player1.money;
+        gameUpdatePacket1.Player1PackedUnits = player1.getPackedUnits(false);
+        gameUpdatePacket1.Player2PackedUnits = player2.getPackedUnits(false);
+        player1.connection.sendTCP(gameUpdatePacket1);
 
-        Packet.PacketBattlefieldUnitsUpdate battlefieldUpdatePacket2 = new Packet.PacketBattlefieldUnitsUpdate();
-        battlefieldUpdatePacket2.Player1PackedUnits = player2.getPackedUnits(true);
-        battlefieldUpdatePacket2.Player2PackedUnits = player1.getPackedUnits(true);
-        player2.connection.sendTCP(battlefieldUpdatePacket2);
+        Packet.PacketGameUpdate gameUpdatePacket2 = new Packet.PacketGameUpdate();
+        gameUpdatePacket2.money = player2.money;
+        gameUpdatePacket2.Player1PackedUnits = player2.getPackedUnits(true);
+        gameUpdatePacket2.Player2PackedUnits = player1.getPackedUnits(true);
+        player2.connection.sendTCP(gameUpdatePacket2);
 
         player1.handleDeadUnits();
         player2.handleDeadUnits();
 
-        if (ticks * tickInterval >= spawnInterval) {
+
+
+        if (unitsTicks * tickInterval >= spawnInterval) {
             Log.info("wave spawned");
-            ticks = 0;
+            unitsTicks = 0;
             player1.spawnWave();
             player2.spawnWave();
             player1.connection.sendTCP(new Packet.PacketWaveSpawned());

@@ -21,7 +21,8 @@ public class Packet {
     public static class PacketRoomDestroyed {
     }
 
-    public static class PacketBattlefieldUnitsUpdate {
+    public static class PacketGameUpdate {
+        public int money;
         public PackedUnit[] Player1PackedUnits;
         public PackedUnit[] Player2PackedUnits;
     }
