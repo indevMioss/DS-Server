@@ -52,7 +52,7 @@ public class UnitValues {
     private static class Unit0Values extends UnitVal {
         private Unit0Values() {
             price = 100;
-            lives = 60;
+            lives = 100;
             damage = 30;
             atk_range = 150; // 0 - ближний бой
             atk_interval = 500; // раз в X ms

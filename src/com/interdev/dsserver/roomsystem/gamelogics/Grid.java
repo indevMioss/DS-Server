@@ -1,6 +1,5 @@
 package com.interdev.dsserver.roomsystem.gamelogics;
 
-
 /**
  * Created by Evg256 on 14.02.2015.
  */
@@ -64,7 +63,7 @@ public class Grid {
                         return false;
                     }
                 } catch (IndexOutOfBoundsException e) {
-                    System.err.print("IndexOutOfBoundsException caught");
+                    System.err.println("IndexOutOfBoundsException caught");
                     return false;
                 }
             }
