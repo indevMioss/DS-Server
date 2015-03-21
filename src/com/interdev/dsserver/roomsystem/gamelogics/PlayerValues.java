@@ -13,6 +13,9 @@ public final class PlayerValues {
 
     public static final int BASE_START_LIVES = 5000;
     public static final int BASE_DAMAGE = 20;
+    public static final int BASE_ATTACK_INTERVAL = 1000;
+    public static final int BASE_ATTACK_DISTANCE = BATTLEFIELD_WIDTH/4;
+
     public static final int START_MONEY = 4000;
 
     //скорость добычи на X lvl (ресурса в сек.)

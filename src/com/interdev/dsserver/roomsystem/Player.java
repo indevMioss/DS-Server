@@ -4,10 +4,7 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.minlog.Log;
 import com.interdev.dsserver.PackedUnit;
 import com.interdev.dsserver.Packet;
-import com.interdev.dsserver.roomsystem.gamelogics.ActiveUnit;
-import com.interdev.dsserver.roomsystem.gamelogics.PassiveUnit;
-import com.interdev.dsserver.roomsystem.gamelogics.PlayerValues;
-import com.interdev.dsserver.roomsystem.gamelogics.UnitValues;
+import com.interdev.dsserver.roomsystem.gamelogics.*;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -21,13 +18,14 @@ public class Player {
     public boolean baseAtTheTop;
     public int money;
     public int income;
-    public float lives;
 
     public int activeUnitsIDsCounter = 0;
     public int passiveUnitsIDsCounter = 0;
 
     public ArrayList<ActiveUnit> activeUnitsList;
     public ArrayList<PassiveUnit> passiveUnitsList;
+
+    public Base base;
 
     public Player(Connection connection, Room room, boolean baseAtTheTop) {
         this.connection = connection;
@@ -37,7 +35,7 @@ public class Player {
         activeUnitsList = new ArrayList<ActiveUnit>();
         passiveUnitsList = new ArrayList<PassiveUnit>();
 
-        lives = PlayerValues.BASE_START_LIVES;
+        base = new Base(myRoom.getOppositePlayer(this),baseAtTheTop);
 
         money = PlayerValues.START_MONEY;
         income = PlayerValues.INCOME_LVL1;
@@ -77,6 +75,7 @@ public class Player {
         for (ActiveUnit unit : activeUnitsList) {
             unit.act(deltaTime);
         }
+        base.act(deltaTime);
     }
 
     public PackedUnit[] getPackedUnits(boolean inversed) {

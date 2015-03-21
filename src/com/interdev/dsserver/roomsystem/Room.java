@@ -109,6 +109,16 @@ public class Room {
 
     }
 
+    public void baseIsDead(Player player) {
+        if (player == player1) {
+            //player 2 win
+        } else if(player == player2) {
+            //player 1 win
+        } else {
+            System.err.println("ERROR public void baseIsDead(Player player) - player is unknown");
+        }
+    }
+
     public Player getOppositePlayer(Player player) {
         if (player1.equals(player)) {
             return player2;
