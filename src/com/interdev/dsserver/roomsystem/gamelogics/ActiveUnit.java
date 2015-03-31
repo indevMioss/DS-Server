@@ -5,24 +5,30 @@ import com.interdev.dsserver.roomsystem.Player;
 
 import java.util.Random;
 
-public class ActiveUnit extends Unit {
+public class ActiveUnit extends Unit implements Targetable {
 
     public Player enemyPlayer; //просто ссылка на второго игрока, полезно
 
-    private ActiveUnit targetUnit = null; //ссылка на юнита, которого будем брать в цель для движения/атаки
+    private Targetable targetUnit = null; //ссылка на юнита, которого будем брать в цель для движения/атаки
     private boolean haveTargetToMove = false; //метка того, что найдена цель для движения
     private boolean haveTargetToAttack = false; //метка того, что найдена цель для атаки
 
     private int attackDeltaTime = 0; //счётчик времени чтобы знать когда ударять/стрелять вражеского юнита (а то каждый такт бил бы)
 
     private Random random = new Random();
-
+    private int yMovementDirection;
 
     public ActiveUnit(short x, short y, short type, Player enemyPlayer, int id) {
         super(x, y, type);
 
         this.id = id;
         this.enemyPlayer = enemyPlayer;
+
+        if (enemyPlayer.baseAtTheTop) {
+            yMovementDirection = 1;
+        } else {
+            yMovementDirection = -1;
+        }
 
     }
 
@@ -31,19 +37,19 @@ public class ActiveUnit extends Unit {
         if (isAlive()) {
             if (!haveTargetToAttack && !haveTargetToMove) { // если у тебя нет ни цели для атаки, ни цели для движения к ней..
                 if (findTargetToMove()) { // ..то попробуй найти цель для движения!
-                    moveToTarget(deltaTime); // если нашел - ебашь к ней.
+                    moveToTarget(deltaTime); // если нашел - иди к ней.
                 } else { // если же её нет
-                    moveForward(deltaTime); // то просто пиздуй вперёд
+                    moveForward(deltaTime); // то просто иди вперёд
                 }
             } else if (haveTargetToAttack) { //если же цель для атаки всё-таки была..
-                attack(deltaTime); // ..то ебашь её!
+                attack(deltaTime); // ..то бей её!
             } else if (haveTargetToMove) { //если цели для атаки не было, но была цель для движения..  [warning у IDE тут походу т.к. просто можно else-if убрать и будет то же самое, оставим как есть для наглядности]
-                moveToTarget(deltaTime); // ..то пиздуй к ней!
+                moveToTarget(deltaTime); // ..то иди же к ней!
             }
         }
     }
 
-    //метод для раздачи пиздюлей
+    //метод для раздачи подзатыльников
     private void attack(float deltaTime) {
         attackDeltaTime += deltaTime;
         if (attackDeltaTime >= atk_interval) {
@@ -56,7 +62,18 @@ public class ActiveUnit extends Unit {
         }
     }
 
-    //метод для получения пиздюлей
+    public short getX() {
+        return x;
+    }
+
+    public short getY() {
+        return y;
+    }
+
+    public int getID() {
+        return id;
+    }
+
     public void getDamage(int damage) {
         this.lives -= damage;
         if (!this.isAlive()) {
@@ -70,9 +87,16 @@ public class ActiveUnit extends Unit {
         float minDistanceSquare = Float.MAX_VALUE;
         float sqrDist;
 
-        for (ActiveUnit unit : enemyPlayer.activeUnitsList) {
-            if (unit.isAlive() && isReachable(unit, sight_distance)) {
-                sqrDist = (float) (Math.pow(x - unit.x, 2) + Math.pow(y - unit.y, 2));
+        for (int i = 0; i < enemyPlayer.fightingUnitsList.size() + 1; i++) {
+            Targetable unit;
+            if (i < enemyPlayer.fightingUnitsList.size()) {
+                unit = enemyPlayer.fightingUnitsList.get(i);
+            } else {
+                unit = enemyPlayer.base;
+            }
+
+            if (unit.isAlive() && isReachable(unit.getX(), unit.getY(), sight_distance)) {
+                sqrDist = (float) (Math.pow(x - unit.getX(), 2) * 2 + Math.pow(y - unit.getY(), 2));
                 if (sqrDist < minDistanceSquare) {
                     minDistanceSquare = sqrDist;
                     haveTargetToMove = true;
@@ -81,34 +105,32 @@ public class ActiveUnit extends Unit {
                 }
             }
         }
+
         if (!foundTarget) targetUnit = null;
+
         return foundTarget;
     }
 
-    //метод для проверки в зоне ли досягаемости юнит, который передаём 1м арументом, 2 аргумент - дистанция [для экономии, зона поиска квадратная, а не круглая]
-    private boolean isReachable(ActiveUnit unit, short distance) {
-        return (Math.abs(x - unit.x) <= distance && (Math.abs(y - unit.y) <= distance));
+    //метод для проверки в зоне ли досягаемости юнит [для экономии, зона поиска квадратная, а не круглая]
+    private boolean isReachable(short targX, short targY, short distance) {
+        return (Math.abs(x - targX) <= distance && (Math.abs(y - targY) <= distance));
     }
 
     //метод для движения тупо вперед, если нет цели для атаки/движения
     private void moveForward(float deltaTime) {
         float secondDivider = deltaTime / 1000f;
-        float y_destination;
-        if (enemyPlayer.baseAtTheTop) {
-            y_destination = y + this.walk_speed * secondDivider;
-        } else {
-            y_destination = y - this.walk_speed * secondDivider;
-        }
-        if (enemyPlayer.myRoom.grid.occupy(this, this.x, (short) y_destination)) {
-            this.y = (short) y_destination;
+        short walk_component = (short) (walk_speed * secondDivider);
+
+        short y_destination = (short) (y + yMovementDirection * walk_component);
+        if (enemyPlayer.myRoom.grid.occupy(this, this.x, y_destination)) {
+            this.y = y_destination;
             if (way_blocked) {
                 if (random.nextBoolean()) {
-                    side *= -1;
+                    randomSidemoveDirection *= -1;
                 }
             }
         } else {
-            // движение в бок поиск пути
-            moveSideWay(deltaTime);
+            goAround(deltaTime);
         }
     }
 
@@ -123,38 +145,38 @@ public class ActiveUnit extends Unit {
             float walk_component = walk_speed * secondDivider; //на сколько меняем координаты за один шаг если идём строго прямо/назад/влево/направо
             float walk_diag_xy_component = diag_walk_speed_xy_component * secondDivider; //на сколько меняем координаты за один шаг если идём наискосок
 
-            if (x < targetUnit.x && y < targetUnit.y) {
+            if (x < targetUnit.getX() && y < targetUnit.getY()) {
                 x_destination = x + walk_diag_xy_component;
                 y_destination = y + walk_diag_xy_component;
-                if (x > targetUnit.x) x_destination = targetUnit.x;
-                if (y > targetUnit.y) y_destination = targetUnit.y;
-            } else if (x > targetUnit.x && y > targetUnit.y) {
+                if (x > targetUnit.getX()) x_destination = targetUnit.getX();
+                if (y > targetUnit.getY()) y_destination = targetUnit.getY();
+            } else if (x > targetUnit.getX() && y > targetUnit.getY()) {
                 x_destination = x - walk_diag_xy_component;
                 y_destination = y - walk_diag_xy_component;
-                if (x < targetUnit.x) x_destination = targetUnit.x;
-                if (y < targetUnit.y) y_destination = targetUnit.y;
-            } else if (x < targetUnit.x && y > targetUnit.y) {
+                if (x < targetUnit.getX()) x_destination = targetUnit.getX();
+                if (y < targetUnit.getY()) y_destination = targetUnit.getY();
+            } else if (x < targetUnit.getX() && y > targetUnit.getY()) {
                 x_destination = x + walk_diag_xy_component;
                 y_destination = y - walk_diag_xy_component;
-                if (x > targetUnit.x) x_destination = targetUnit.x;
-                if (y < targetUnit.y) y_destination = targetUnit.y;
-            } else if (x > targetUnit.x && y < targetUnit.y) {
+                if (x > targetUnit.getX()) x_destination = targetUnit.getX();
+                if (y < targetUnit.getY()) y_destination = targetUnit.getY();
+            } else if (x > targetUnit.getX() && y < targetUnit.getY()) {
                 x_destination = x - walk_diag_xy_component;
                 y_destination = y + walk_diag_xy_component;
-                if (x < targetUnit.x) x_destination = targetUnit.x;
-                if (y > targetUnit.y) y_destination = targetUnit.y;
-            } else if (x < targetUnit.x) {
+                if (x < targetUnit.getX()) x_destination = targetUnit.getX();
+                if (y > targetUnit.getY()) y_destination = targetUnit.getY();
+            } else if (x < targetUnit.getX()) {
                 x_destination = x + walk_component;
-                if (x > targetUnit.x) x_destination = targetUnit.x;
-            } else if (x > targetUnit.x) {
+                if (x > targetUnit.getX()) x_destination = targetUnit.getX();
+            } else if (x > targetUnit.getX()) {
                 x_destination = x - walk_component;
-                if (x < targetUnit.x) x_destination = targetUnit.x;
-            } else if (y < targetUnit.y) {
+                if (x < targetUnit.getX()) x_destination = targetUnit.getX();
+            } else if (y < targetUnit.getY()) {
                 y_destination = y + walk_component;
-                if (y > targetUnit.y) y_destination = targetUnit.y;
-            } else if (y > targetUnit.y) {
+                if (y > targetUnit.getY()) y_destination = targetUnit.getY();
+            } else if (y > targetUnit.getY()) {
                 y_destination = y - walk_component;
-                if (y < targetUnit.y) y_destination = targetUnit.y;
+                if (y < targetUnit.getY()) y_destination = targetUnit.getY();
             } else {
                 System.out.println("else { else { else { ... ");
                 return;
@@ -165,15 +187,15 @@ public class ActiveUnit extends Unit {
                 y = (short) y_destination;
                 if (way_blocked) {
                     if (random.nextBoolean()) {
-                        side *= -1;
+                        randomSidemoveDirection *= -1;
                     }
                 }
             } else {
                 // движение в бок поиск пути
-                moveSideWay(deltaTime);
+                goAround(deltaTime);
             }
 
-            if (isReachable(targetUnit, atk_range)) {
+            if (isReachable(targetUnit.getX(), targetUnit.getY(), atk_range)) {
                 haveTargetToAttack = true;
             }
         } else {
@@ -181,25 +203,24 @@ public class ActiveUnit extends Unit {
         }
     }
 
-    void moveSideWay(float deltaTime) {
-        float x_destination = x; //будущие новые координаты
-        float secondDivider = deltaTime / 1000f; //множитель для постоянной скорости чтобы не зависеть от тикрейта сервера
-        float walk_component = walk_speed * secondDivider; //на сколько меняем координаты за один шаг если идём строго прямо/назад/влево/направо
-        x_destination += walk_component;
-        if (enemyPlayer.baseAtTheTop) {
-            x_destination = x + (this.walk_speed * secondDivider) * side;
+    private void goAround(float deltaTime) {
+        float secondDivider = deltaTime / 1000f;
+        float walk_component = walk_speed * secondDivider;
+
+        short y_destination = (short) (y + yMovementDirection * walk_component);
+        if (enemyPlayer.myRoom.grid.occupy(this, x, y_destination)) {
+            y = y_destination;
         } else {
-            x_destination = x - (this.walk_speed * secondDivider) * side;
-        }
-        if (enemyPlayer.myRoom.grid.occupy(this, (short) x_destination, this.y)) {
-            this.x = (short) x_destination;
-        } else {
-            side *= -1;
+            short x_destination = (short) (x + walk_component * randomSidemoveDirection);
+            if (enemyPlayer.myRoom.grid.occupy(this, x_destination, y)) {
+                this.x = x_destination;
+            } else {
+                randomSidemoveDirection *= -1;
+            }
         }
 
     }
 
-    //проверка, живой ли юнит
     public boolean isAlive() {
         return (lives > 0);
     }
@@ -207,7 +228,7 @@ public class ActiveUnit extends Unit {
     //метод для отправки пакетов
     public int getTargetId() {
         if (!haveTargetToAttack || targetUnit == null) return 0;
-        return targetUnit.id;
+        return targetUnit.getID();
     }
 
 }

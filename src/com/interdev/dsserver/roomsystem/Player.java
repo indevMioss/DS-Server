@@ -19,10 +19,11 @@ public class Player {
     public int money;
     public int income;
 
-    public int activeUnitsIDsCounter = 0;
+    public int activeUnitsIDsCounter;
     public int passiveUnitsIDsCounter = 0;
 
-    public ArrayList<ActiveUnit> activeUnitsList;
+    public ArrayList<ActiveUnit> fightingUnitsList;
+
     public ArrayList<PassiveUnit> passiveUnitsList;
 
     public Base base;
@@ -30,26 +31,29 @@ public class Player {
     public Player(Connection connection, Room room, boolean baseAtTheTop) {
         this.connection = connection;
         myRoom = room;
-
         this.baseAtTheTop = baseAtTheTop;
-        activeUnitsList = new ArrayList<ActiveUnit>();
-        passiveUnitsList = new ArrayList<PassiveUnit>();
 
-        base = new Base(myRoom.getOppositePlayer(this),baseAtTheTop);
+        if (baseAtTheTop) { //оставить часть диапазона для спец.ID, напрмиер - базы
+            activeUnitsIDsCounter = -10;
+        } else {
+            activeUnitsIDsCounter = +10;
+        }
+
+        fightingUnitsList = new ArrayList<ActiveUnit>();
+        passiveUnitsList = new ArrayList<PassiveUnit>();
 
         money = PlayerValues.START_MONEY;
         income = PlayerValues.INCOME_LVL1;
     }
 
-    public void iAmReady() {
-        Log.info("iAmReady()");
-        if (!ready) {
-            Log.info("if (!ready)");
+    public void postInitBase(Base base) {
+        this.base = base;
+    }
 
+    public void iAmReady() {
+        if (!ready) {
             ready = true;
             if (myRoom.getOppositePlayer(this).ready) {
-                Log.info(" if (myRoom.getOppositePlayer(this).ready)");
-
                 myRoom.start();
             }
         }
@@ -57,7 +61,7 @@ public class Player {
 
     public void spawnWave() {
         for (PassiveUnit unit : passiveUnitsList) {
-            spawnUnit(unit.x, unit.y, unit.type);
+            spawnUnit(unit.getX(), unit.getY(), unit.type);
         }
     }
 
@@ -68,20 +72,20 @@ public class Player {
             activeUnitsIDsCounter++;
         }
         ActiveUnit unit = new ActiveUnit(x, y, type, myRoom.getOppositePlayer(this), activeUnitsIDsCounter);
-        activeUnitsList.add(unit);
+        fightingUnitsList.add(unit);
     }
 
     public void act(float deltaTime) {
-        for (ActiveUnit unit : activeUnitsList) {
+        for (ActiveUnit unit : fightingUnitsList) {
             unit.act(deltaTime);
         }
         base.act(deltaTime);
     }
 
     public PackedUnit[] getPackedUnits(boolean inversed) {
-        PackedUnit[] packedUnitsArray = new PackedUnit[activeUnitsList.size()];
+        PackedUnit[] packedUnitsArray = new PackedUnit[fightingUnitsList.size()];
         int i = 0;
-        for (ActiveUnit unit : activeUnitsList) {
+        for (ActiveUnit unit : fightingUnitsList) {
             PackedUnit packedUnit = new PackedUnit(unit, inversed);
             packedUnitsArray[i] = packedUnit;
             i++;
@@ -90,7 +94,7 @@ public class Player {
     }
 
     public void handleDeadUnits() {
-        Iterator<ActiveUnit> it = activeUnitsList.iterator();
+        Iterator<ActiveUnit> it = fightingUnitsList.iterator();
         while (it.hasNext()) {
             ActiveUnit unit = it.next();
             if (!unit.isAlive()) {

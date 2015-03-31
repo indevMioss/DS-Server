@@ -14,14 +14,14 @@ public class PackedUnit {
     public PackedUnit(ActiveUnit unit, boolean inversed) {
         type = unit.type;
         if (inversed) {
-            x = (short) (PlayerValues.BATTLEFIELD_WIDTH - unit.x);
-            y = (short) (PlayerValues.TOTAL_FIELD_HEIGHT - unit.y);
+            x = (short) (PlayerValues.BATTLEFIELD_WIDTH - unit.getX());
+            y = (short) (PlayerValues.TOTAL_FIELD_HEIGHT - unit.getY());
         } else {
-            x = unit.x;
-            y = unit.y;
+            x = unit.getX();
+            y = unit.getY();
         }
         lives = unit.lives;
-        id = unit.id;
+        id = unit.getID();
         targetId = unit.getTargetId();
     }
 }

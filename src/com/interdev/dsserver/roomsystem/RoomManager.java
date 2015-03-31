@@ -23,10 +23,16 @@ public class RoomManager {
 
         rooms.add(new Room(connection1, connection2));
 
-        Packet.PacketRoomReady packet = new Packet.PacketRoomReady();
-        packet.tickInterval = Room.tickInterval;
-        connection1.sendTCP(packet);
-        connection2.sendTCP(packet);
+        Packet.PacketRoomReady packetForPlayer1 = new Packet.PacketRoomReady();
+        packetForPlayer1.tickInterval = Room.tickInterval;
+        packetForPlayer1.baseAtTheTop = false;
+        connection1.sendTCP(packetForPlayer1);
+
+        Packet.PacketRoomReady packetForPlayer2 = new Packet.PacketRoomReady();
+        packetForPlayer2.tickInterval = Room.tickInterval;
+        packetForPlayer2.baseAtTheTop = true;
+        connection2.sendTCP(packetForPlayer2);
+
         return true;
     }
 

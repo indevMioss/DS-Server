@@ -7,4 +7,12 @@ public class PassiveUnit extends Unit {
         super(x, y, type);
         this.id = id;
     }
+
+    public short getX() {
+        return x;
+    }
+
+    public short getY() {
+        return y;
+    }
 }

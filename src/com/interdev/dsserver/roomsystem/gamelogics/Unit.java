@@ -3,8 +3,8 @@ package com.interdev.dsserver.roomsystem.gamelogics;
 import com.esotericsoftware.minlog.Log;
 
 public abstract class Unit {
-    public int id;
-    public short x, y;
+    protected int id;
+    protected short x, y;
     public short type;
 
     public short lives;
@@ -18,7 +18,7 @@ public abstract class Unit {
     public short texture_width;
     public short size_in_cells;
 
-    short side = 1;
+    short randomSidemoveDirection = 1;
     boolean way_blocked = false;
 
 

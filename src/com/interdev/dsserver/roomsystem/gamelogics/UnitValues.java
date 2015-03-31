@@ -42,7 +42,7 @@ public class UnitValues {
         public float atk_interval; // раз в X ms
         public short walk_speed; // виртуальных px/s
         public short texture_width;
-        public short sight_distance = PlayerValues.BATTLEFIELD_WIDTH/4;
+        public short sight_distance = PlayerValues.BATTLEFIELD_WIDTH/2;
 
         public String texturePath;
         public String iconTexturePath;
@@ -54,7 +54,7 @@ public class UnitValues {
             price = 100;
             lives = 100;
             damage = 30;
-            atk_range = 150; // 0 - ближний бой
+            atk_range = 256; // 0 - ближний бой
             atk_interval = 500; // раз в X ms
             walk_speed = 60; // виртуальных px/s
             texture_width = 64;

@@ -148,6 +148,13 @@
       </item>
     </group>
   </component>
+  <component name="ProjectDictionaryState">
+    <dictionary name="Amaz">
+      <words>
+        <w>targetable</w>
+      </words>
+    </dictionary>
+  </component>
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/DS-Server.iml" filepath="$PROJECT_DIR$/DS-Server.iml" />

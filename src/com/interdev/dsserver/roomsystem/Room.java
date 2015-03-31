@@ -3,7 +3,9 @@ package com.interdev.dsserver.roomsystem;
 
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.minlog.Log;
+import com.interdev.dsserver.PackedBase;
 import com.interdev.dsserver.Packet;
+import com.interdev.dsserver.roomsystem.gamelogics.Base;
 import com.interdev.dsserver.roomsystem.gamelogics.Grid;
 
 import java.util.Timer;
@@ -33,6 +35,9 @@ public class Room {
     public Room(Connection connection1, Connection connection2) {
         player1 = new Player(connection1, this, false);
         player2 = new Player(connection2, this, true);
+
+        player1.postInitBase(new Base(player2, player1.baseAtTheTop));
+        player2.postInitBase(new Base(player1, player2.baseAtTheTop));
 
         grid = new Grid(gridSizeX, gridSizeY);
         packedCells = new PackedCell[gridSizeY][gridSizeX]; // DEBUG
@@ -81,14 +86,26 @@ public class Room {
         packetCellsDebug.cells = packedCells;
         player1.connection.sendTCP(packetCellsDebug);
 
+        PackedBase packedBasePlayer1 = new PackedBase();
+        packedBasePlayer1.lives = player1.base.lives;
+        packedBasePlayer1.targetId = player1.base.getTargetID();
+
+        PackedBase packedBasePlayer2 = new PackedBase();
+        packedBasePlayer2.lives = player2.base.lives;
+        packedBasePlayer2.targetId = player2.base.getTargetID();
+
         Packet.PacketGameUpdate gameUpdatePacket1 = new Packet.PacketGameUpdate();
         gameUpdatePacket1.money = player1.money;
+        gameUpdatePacket1.myBase = packedBasePlayer1;
+        gameUpdatePacket1.enemyBase = packedBasePlayer2;
         gameUpdatePacket1.Player1PackedUnits = player1.getPackedUnits(false);
         gameUpdatePacket1.Player2PackedUnits = player2.getPackedUnits(false);
         player1.connection.sendTCP(gameUpdatePacket1);
 
         Packet.PacketGameUpdate gameUpdatePacket2 = new Packet.PacketGameUpdate();
         gameUpdatePacket2.money = player2.money;
+        gameUpdatePacket2.myBase = packedBasePlayer2;
+        gameUpdatePacket2.enemyBase = packedBasePlayer1;
         gameUpdatePacket2.Player1PackedUnits = player2.getPackedUnits(true);
         gameUpdatePacket2.Player2PackedUnits = player1.getPackedUnits(true);
         player2.connection.sendTCP(gameUpdatePacket2);
@@ -111,9 +128,9 @@ public class Room {
 
     public void baseIsDead(Player player) {
         if (player == player1) {
-            //player 2 win
+            //player 2 won
         } else if(player == player2) {
-            //player 1 win
+            //player 1 won
         } else {
             System.err.println("ERROR public void baseIsDead(Player player) - player is unknown");
         }
